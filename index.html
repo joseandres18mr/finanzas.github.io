@@ -1,145 +1,383 @@
-const ID_HOJA = "1Tyk_lDxTwMD9SIiy01nwoU7M6O8itdGni2kX8XF9paw"; // Tu ID
-const NOMBRE_HOJA = "Transacciones";
-
-function doPost(e) {
-  var lock = LockService.getScriptLock();
-  lock.tryLock(10000);
-
-  try {
-    var ss = SpreadsheetApp.openById(ID_HOJA);
-    var sheet = ss.getSheetByName(NOMBRE_HOJA);
-    var data = null;
-
-    // INTENTO 1: Leer como JSON (Lo ideal)
-    try {
-      if (e.postData && e.postData.contents) {
-        data = JSON.parse(e.postData.contents);
-      }
-    } catch (err) {}
-
-    // INTENTO 2: Leer como Formulario (Respaldo)
-    if (!data) {
-      data = e.parameter;
-    }
-
-    // --- ACCIÓN: PAGAR DEUDA ---
-    if (data && data.accion === "actualizar_estado") {
-      var idBuscado = String(data.id).trim(); // Limpiar ID
-      var dataRange = sheet.getDataRange();
-      var values = dataRange.getValues();
-      var filaEncontrada = -1;
-
-      // Buscar ID ignorando formatos
-      for (var i = 1; i < values.length; i++) {
-        var idEnFila = String(values[i][0]).trim();
-        if (idEnFila === idBuscado) {
-          filaEncontrada = i + 1;
-          break;
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soy la Mokkita Ahorradora</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { 
+            background-color: #fff0f3; /* Rosa muy suave */
+            font-family: 'Nunito', sans-serif; 
         }
-      }
+        
+        /* PANTALLA LOGIN */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, #ffccd5 0%, #fff0f3 100%);
+            z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        
+        .mokka-img {
+            width: 180px; height: 180px; 
+            border-radius: 50%; 
+            object-fit: cover;
+            border: 5px solid white;
+            box-shadow: 0 8px 20px rgba(255, 100, 100, 0.2);
+            margin-bottom: 20px;
+        }
 
-      if (filaEncontrada > 0) {
-        sheet.getRange(filaEncontrada, 9).setValue("PAGADO"); // Columna I
-        SpreadsheetApp.flush(); // FORZAR GUARDADO INMEDIATO
-        return ContentService.createTextOutput("PAGADO_OK");
-      }
-      return ContentService.createTextOutput("ERROR_ID_NO_ENCONTRADO");
-    }
+        .login-btn {
+            background: white; border: none; border-radius: 20px;
+            padding: 20px; width: 140px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.2s; cursor: pointer;
+        }
+        .login-btn:active { transform: scale(0.95); }
+        .login-emoji { font-size: 3.5rem; display: block; margin-bottom: 10px; }
+        .login-text { font-weight: 900; color: #ff5c8d; font-size: 1.1rem; }
 
-    // --- ACCIÓN: REGISTRAR ---
-    // Mapeo de nombres cariñosos a nombres reales para la base de datos
-    var usuarioReal = data.usuario;
-    if (usuarioReal === "Mi papi") usuarioReal = "Jose";
-    if (usuarioReal === "Mi mami") usuarioReal = "Gabriela";
+        /* APP PRINCIPAL */
+        .card { border-radius: 20px; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .form-control, .form-select { 
+            border-radius: 15px; padding: 12px; border: 2px solid #ffe3e8; 
+            background-color: #fffbfb;
+        }
+        .form-control:focus { border-color: #ff8fa3; box-shadow: none; }
+        
+        .btn-mokka { 
+            background-color: #ff8fa3; color: white; border-radius: 15px; 
+            font-weight: 800; padding: 12px; border: none; 
+        }
+        .btn-mokka:hover { background-color: #ff758f; color: white; }
 
-    var esCompartido = (data.es_compartido === 'on' || data.es_compartido === true);
-    var estado = "";
+        .nav-pills .nav-link.active { background-color: #ff8fa3; border-radius: 15px; }
+        .nav-pills .nav-link { color: #ff8fa3; }
+
+        /* ESTADOS DEUDA */
+        .shared-item { 
+            background: white; border-radius: 15px; padding: 15px; margin-bottom: 12px; 
+            border: 2px solid #ffe3e8; position: relative;
+        }
+        .shared-item.pagado { background-color: #e3ffe8; border-color: #b9fbc0; opacity: 0.7; }
+        .badge-status { border-radius: 10px; padding: 5px 10px; }
+    </style>
+</head>
+<body>
+
+<div id="login-screen">
+    <img src="mokka.jpg" alt="Mokkita" class="mokka-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/616/616408.png'">
     
-    if (data.tipo === 'Ingreso') estado = "-";
-    else if (esCompartido) estado = "IMPAGO";
-    else estado = "PERSONAL";
+    <h1 class="fw-bold mb-1" style="color: #ff5c8d;">¡Hola!</h1>
+    <p class="mb-5 text-muted fw-bold">Soy la Mokkita ahorradora 🐾</p>
+    
+    <p class="mb-3 fw-bold" style="color: #888;">¿Quién eres?</p>
+    
+    <div class="d-flex gap-3">
+        <div class="login-btn" onclick="iniciarSesion('Jose', 'Mi papi')">
+            <span class="login-emoji">👨🏻‍💻</span>
+            <span class="login-text">Mi papi</span>
+        </div>
+        
+        <div class="login-btn" onclick="iniciarSesion('Gabriela', 'Mi mami')">
+            <span class="login-emoji">👩🏼‍🎨</span> <span class="login-text">Mi mami</span>
+        </div>
+    </div>
+</div>
 
-    sheet.appendRow([
-      Utilities.getUuid(),
-      new Date(),
-      usuarioReal, // Guardamos "Jose" o "Gabriela" en el Excel, no "Papi/Mami"
-      data.tipo,
-      data.categoria,
-      data.monto,
-      data.descripcion,
-      esCompartido ? "TRUE" : "FALSE",
-      estado
-    ]);
+<div id="app-screen" class="container py-3" style="max-width: 600px; display:none;">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 px-2">
+        <div class="d-flex align-items-center gap-2">
+            <div style="font-size: 2rem;" id="icono-usuario">🐶</div>
+            <div>
+                <h4 class="fw-bold m-0" style="color:#555;" id="saludo-usuario">Hola!</h4>
+                <small class="text-muted fw-bold">Vamos a ahorrar</small>
+            </div>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="location.reload()">Salir</button>
+    </div>
 
-    return ContentService.createTextOutput("REGISTRO_OK");
+    <ul class="nav nav-pills nav-fill mb-4 bg-white p-1 rounded-4 shadow-sm">
+        <li class="nav-item"><button class="nav-link active fw-bold" data-bs-toggle="tab" data-bs-target="#registro-pane">📝 Anotar</button></li>
+        <li class="nav-item"><button class="nav-link fw-bold" data-bs-toggle="tab" data-bs-target="#graficos-pane" onclick="cargarDatos()">📊 Mi Bolsillo</button></li>
+    </ul>
 
-  } catch (error) {
-    return ContentService.createTextOutput("ERROR: " + error.toString());
-  } finally {
-    lock.releaseLock();
-  }
-}
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="registro-pane">
+            <div class="card p-4">
+                <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+                
+                <form id="financeForm" 
+                      action="https://script.google.com/macros/s/AKfycbz2hTiT_DCceJkzh0_rMjy0EJkbDAgXEyztYAVNNMIAkb4CwQC1ySajrmmB8U7KO8ubuQ/exec" 
+                      method="POST" target="hidden_iframe">
+                    
+                    <input type="hidden" name="usuario" id="usuario-input"> <div class="mb-3">
+                        <label class="fw-bold text-muted small ms-1">¿QUÉ ES?</label>
+                        <select class="form-select" name="tipo" id="tipoSelector" onchange="cambiarColor()">
+                            <option value="Gasto">Un Gasto 💸</option>
+                            <option value="Ingreso">Un Ingreso 💰</option>
+                        </select>
+                    </div>
 
-function doGet(e) {
-  var ss = SpreadsheetApp.openById(ID_HOJA);
-  var sheet = ss.getSheetByName(NOMBRE_HOJA);
-  var rows = sheet.getDataRange().getValues();
-  
-  var stats = {
-    "Jose": { ingresos: 0, gastos: 0, saldo: 0, desglose: {}, compartidos: [] },
-    "Gabriela": { ingresos: 0, gastos: 0, saldo: 0, desglose: {}, compartidos: [] }
-  };
+                    <div class="mb-3">
+                        <label class="fw-bold text-muted small ms-1">¿CUÁNTO?</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-0 bg-transparent fw-bold text-muted">$</span>
+                            <input type="text" class="form-control" name="monto" id="monto" placeholder="0" required inputmode="numeric">
+                        </div>
+                    </div>
 
-  var mesActual = new Date().getMonth();
-  var anioActual = new Date().getFullYear();
+                    <div class="mb-3">
+                        <label class="fw-bold text-muted small ms-1">CATEGORÍA</label>
+                        <select class="form-select" name="categoria">
+                            <option value="Supermercado">🛒 Supermercado</option>
+                            <option value="Comida Fuera">🍔 Comida / Delivery</option>
+                            <option value="Transporte">🚌 Transporte / Bencina</option>
+                            <option value="Cuentas">💡 Cuentas / Servicios</option>
+                            <option value="Arriendo">🏠 Arriendo / GC</option>
+                            <option value="Mascotas">🐶 Cosas para Mokka</option>
+                            <option value="Salud">💊 Salud</option>
+                            <option value="Ocio">🎮 Diversión</option>
+                            <option value="Sueldo">💵 Sueldo</option>
+                            <option value="Otros">📦 Otros</option>
+                        </select>
+                    </div>
 
-  for (var i = 1; i < rows.length; i++) {
-    var fila = rows[i];
-    var id = String(fila[0]).trim();
-    var fecha = new Date(fila[1]);
-    var usuario = fila[2]; // En el Excel dice Jose/Gabriela
-    var tipo = fila[3];
-    var categoria = fila[4];
-    var monto = parseFloat(fila[5]);
-    var desc = fila[6] || "Sin descripción";
-    var esCompartido = (fila[7] === "TRUE" || fila[7] === true);
-    var estado = String(fila[8]).trim();
+                    <div class="mb-3">
+                        <input type="text" class="form-control" name="descripcion" placeholder="¿Qué compraste? (Opcional)">
+                    </div>
 
-    if (fecha.getMonth() === mesActual && fecha.getFullYear() === anioActual) {
-      var fechaFmt = Utilities.formatDate(fecha, Session.getScriptTimeZone(), "dd/MM");
+                    <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-4 mb-3" id="div-compartido">
+                        <div><strong class="d-block text-muted" style="font-size:0.9rem;">¿Es para los dos?</strong><span class="small text-muted">Mitad y mitad</span></div>
+                        <div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="es_compartido" style="width: 3em; height: 1.5em;"></div>
+                    </div>
 
-      if (tipo === 'Ingreso') {
-        if (stats[usuario]) stats[usuario].ingresos += monto;
-      } else {
-        if (esCompartido) {
-          var mitad = monto / 2;
-          var item = { id: id, desc: desc, montoTotal: monto, miParte: mitad, fecha: fechaFmt, estado: estado, acreedor: usuario };
-          
-          // Cruzar deudas
-          if (usuario === "Jose") {
-            stats["Gabriela"].compartidos.push(item);
-            sumarGasto(stats, "Jose", categoria, mitad, desc, fechaFmt);
-            sumarGasto(stats, "Gabriela", categoria, mitad, desc, fechaFmt);
-          } else if (usuario === "Gabriela") {
-            stats["Jose"].compartidos.push(item);
-            sumarGasto(stats, "Gabriela", categoria, mitad, desc, fechaFmt);
-            sumarGasto(stats, "Jose", categoria, mitad, desc, fechaFmt);
-          }
-        } else {
-          if (stats[usuario]) sumarGasto(stats, usuario, categoria, monto, desc, fechaFmt);
-        }
-      }
+                    <button type="submit" class="btn btn-mokka w-100 shadow-sm" id="btnSubmit">Guardar</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="graficos-pane">
+            <div id="loading" class="text-center py-5">
+                <div class="spinner-border text-danger" role="status"></div>
+                <p class="mt-2 text-muted small fw-bold">Oliendo las cuentas... 🐶</p>
+            </div>
+
+            <div id="stats-content" style="display:none;">
+                <div class="card p-3 mb-3 bg-white border-0 shadow-sm text-center">
+                    <small class="text-uppercase text-muted fw-bold" style="font-size:0.7rem;">Me queda en el bolsillo</small>
+                    <h1 class="fw-black my-1" style="color: #4cc9f0;" id="mi-saldo">$0</h1>
+                    <div class="d-flex justify-content-center gap-3 mt-2">
+                        <span class="badge bg-light text-success border border-success">Ingresos: <span id="mi-ingreso">$0</span></span>
+                        <span class="badge bg-light text-danger border border-danger">Gastos: <span id="mi-gasto">$0</span></span>
+                    </div>
+                </div>
+
+                <button class="btn btn-warning w-100 mb-4 py-3 rounded-4 fw-bold shadow-sm text-white" onclick="verCompartidos()" style="background: #ffbe0b; border:none;">
+                    💸 Ver Deudas Pendientes
+                    <span class="badge bg-danger rounded-pill ms-2" id="badge-deudas" style="display:none">0</span>
+                </button>
+
+                <div class="card p-3">
+                    <h6 class="fw-bold text-muted mb-3 text-center">En qué se fue la plata</h6>
+                    <div style="height:250px;"><canvas id="miChart"></canvas></div>
+                </div>
+                
+                <button class="btn btn-light text-muted w-100 mt-3 rounded-pill" onclick="cargarDatos()">🔄 Actualizar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="compartidosModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header border-0"><h5 class="modal-title fw-bold">🤝 Cuentas con tu pareja</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body bg-light rounded-bottom"><div id="lista-compartidos"></div></div></div></div></div>
+<div class="modal fade" id="detalleModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header border-0"><h5 class="modal-title fw-bold" id="modalTitulo">Detalle</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div id="lista-detalle"></div></div></div></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // !!! PEGA AQUÍ LA URL DE TU SCRIPT NUEVO !!!
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz2hTiT_DCceJkzh0_rMjy0EJkbDAgXEyztYAVNNMIAkb4CwQC1ySajrmmB8U7KO8ubuQ/exec";
+    
+    let usuarioApp = ""; // Jose o Gabriela
+    let usuarioCari = ""; // Mi papi o Mi mami
+    let myChart = null;
+    let datosCompletos = null;
+
+    function iniciarSesion(real, carino) {
+        usuarioApp = real;
+        usuarioCari = carino;
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app-screen').style.display = 'block';
+        
+        document.getElementById('saludo-usuario').innerText = "Hola, " + carino + "!";
+        document.getElementById('icono-usuario').innerText = (real === 'Jose') ? '👨🏻‍💻' : '👩🏼‍🎨';
+        document.getElementById('usuario-input').value = carino; // Enviamos "Mi papi" al form
     }
-  }
-  stats["Jose"].saldo = stats["Jose"].ingresos - stats["Jose"].gastos;
-  stats["Gabriela"].saldo = stats["Gabriela"].ingresos - stats["Gabriela"].gastos;
 
-  return ContentService.createTextOutput(JSON.stringify(stats)).setMimeType(ContentService.MimeType.JSON);
-}
+    // --- FORMATEO Y ENVIO ---
+    const montoInput = document.getElementById('monto');
+    const form = document.getElementById('financeForm');
+    const btnSubmit = document.getElementById('btnSubmit');
+    var submitted = false;
 
-function sumarGasto(obj, user, cat, monto, desc, fecha) {
-  obj[user].gastos += monto;
-  if (!obj[user].desglose[cat]) obj[user].desglose[cat] = { valor: 0, items: [] };
-  obj[user].desglose[cat].valor += monto;
-  obj[user].desglose[cat].items.push({ monto: monto, desc: desc, fecha: fecha });
-}
+    montoInput.addEventListener('input', (e) => {
+        let val = e.target.value.replace(/\D/g, "");
+        e.target.value = val ? new Intl.NumberFormat('es-CL').format(val) : "";
+    });
+
+    function cambiarColor() {
+        const tipo = document.getElementById('tipoSelector').value;
+        const divComp = document.getElementById('div-compartido');
+        if(tipo === 'Gasto') {
+            btnSubmit.style.backgroundColor = "#ff8fa3";
+            btnSubmit.innerText = "Registrar Gasto";
+            divComp.style.display = "flex";
+        } else {
+            btnSubmit.style.backgroundColor = "#4cc9f0";
+            btnSubmit.innerText = "Registrar Ingreso";
+            divComp.style.display = "none";
+            form.es_compartido.checked = false;
+        }
+    }
+
+    form.onsubmit = function() {
+        submitted = true;
+        btnSubmit.innerText = "Guardando...";
+        btnSubmit.disabled = true;
+    };
+
+    document.getElementById('hidden_iframe').onload = function() {
+        if (submitted) {
+            alert("✅ ¡Anotado!");
+            form.reset();
+            document.getElementById('usuario-input').value = usuarioCari; // Restaurar nombre cariño
+            cambiarColor();
+            btnSubmit.disabled = false;
+            submitted = false;
+        }
+    };
+
+    // --- CARGAR DATOS ---
+    function cargarDatos() {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('stats-content').style.display = 'none';
+        
+        fetch(APPS_SCRIPT_URL)
+            .then(r => r.json())
+            .then(data => {
+                datosCompletos = data;
+                const misDatos = data[usuarioApp]; // Accedemos con "Jose" o "Gabriela"
+                const fmt = (n) => "$ " + new Intl.NumberFormat('es-CL').format(n);
+                
+                document.getElementById('mi-ingreso').innerText = fmt(misDatos.ingresos);
+                document.getElementById('mi-gasto').innerText = fmt(misDatos.gastos);
+                document.getElementById('mi-saldo').innerText = fmt(misDatos.saldo);
+
+                // Badge rojo
+                const pendientes = misDatos.compartidos.filter(i => i.estado === "IMPAGO").length;
+                const badge = document.getElementById('badge-deudas');
+                if(pendientes > 0) { badge.innerText = pendientes; badge.style.display = 'inline-block'; }
+                else { badge.style.display = 'none'; }
+
+                renderChart(misDatos.desglose);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('stats-content').style.display = 'block';
+            });
+    }
+
+    function renderChart(desglose) {
+        const ctx = document.getElementById('miChart').getContext('2d');
+        if(myChart) myChart.destroy();
+        const labels = Object.keys(desglose);
+        const vals = labels.map(k => desglose[k].valor);
+
+        myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{ data: vals, backgroundColor: ['#ffadad', '#ffd6a5', '#fdffb6', '#caffbf', '#9bf6ff', '#a0c4ff', '#bdb2ff', '#ffc6ff'], borderWidth:0 }]
+            },
+            options: { 
+                plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: { family: 'Nunito' } } } },
+                onClick: (e, el) => { if(el.length > 0) abrirDetalle(labels[el[0].index]); }
+            }
+        });
+    }
+
+    function abrirDetalle(cat) {
+        const items = datosCompletos[usuarioApp].desglose[cat].items;
+        const lista = document.getElementById('lista-detalle');
+        document.getElementById('modalTitulo').innerText = cat;
+        lista.innerHTML = "";
+        items.forEach(i => {
+             lista.insertAdjacentHTML('beforeend', `
+                <div class="d-flex justify-content-between border-bottom py-2">
+                    <div><div class="fw-bold text-dark">${i.desc}</div><div class="text-muted small">${i.fecha}</div></div>
+                    <div class="fw-bold" style="color:#ff5c8d">$ ${new Intl.NumberFormat('es-CL').format(i.monto)}</div>
+                </div>`);
+        });
+        new bootstrap.Modal(document.getElementById('detalleModal')).show();
+    }
+
+    // --- LOGICA DEUDAS (EL FIX) ---
+    function verCompartidos() {
+        const items = datosCompletos[usuarioApp].compartidos;
+        const lista = document.getElementById('lista-compartidos');
+        lista.innerHTML = "";
+        
+        if(items.length === 0) {
+            lista.innerHTML = "<div class='text-center py-4 text-muted'>✨ ¡Todo pagado! Eres libre. ✨</div>";
+        } else {
+            items.forEach(i => {
+                const pagado = i.estado === "PAGADO";
+                const html = `
+                <div class="shared-item ${pagado ? 'pagado' : ''}" id="card-${i.id}">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="badge bg-white text-muted border">📅 ${i.fecha}</span>
+                        <span class="badge ${pagado?'bg-success':'bg-danger'}">${pagado?'PAGADO ✅':'POR PAGAR ❌'}</span>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1">${i.desc}</h6>
+                    <small class="text-muted">Pagó: <strong>${i.acreedor}</strong></small>
+                    <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                        <div class="fw-bold" style="color:#555">Tu parte: $${new Intl.NumberFormat('es-CL').format(i.miParte)}</div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" style="width:3em; height:1.5em; cursor:pointer;" 
+                                   onchange="pagar('${i.id}', this)" ${pagado ? 'checked disabled' : ''}>
+                        </div>
+                    </div>
+                </div>`;
+                lista.insertAdjacentHTML('beforeend', html);
+            });
+        }
+        new bootstrap.Modal(document.getElementById('compartidosModal')).show();
+    }
+
+    function pagar(id, check) {
+        if(!confirm("¿Ya le pagaste a tu pareja? 💸")) { check.checked = false; return; }
+        
+        check.disabled = true;
+        document.getElementById('card-'+id).style.opacity = '0.5';
+        
+        // ENVÍO ROBUSTO (STRINGIFY JSON)
+        const payload = JSON.stringify({ accion: "actualizar_estado", id: String(id) });
+        
+        fetch(APPS_SCRIPT_URL, {
+            method: 'POST', mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' }, // Hack para que Apps Script lo lea
+            body: payload
+        }).then(() => {
+            // UI Update Optimista
+            const c = document.getElementById('card-'+id);
+            c.classList.add('pagado');
+            c.querySelector('.badge').className = "badge bg-success";
+            c.querySelector('.badge').innerText = "PAGADO ✅";
+            c.style.opacity = '0.8';
+            alert("¡Listo! Deuda saldada 🐶");
+        }).catch(e => { alert("Error de conexión"); check.disabled = false; });
+    }
+</script>
+
+</body>
+</html>
