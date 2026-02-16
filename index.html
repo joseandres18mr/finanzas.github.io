@@ -12,21 +12,16 @@
         .form-control, .form-select { border-radius: 12px; padding: 12px; }
         .btn-lg { border-radius: 12px; font-weight: 600; padding: 12px; }
         
-        /* Colores botones */
-        .btn-gasto { background-color: #ff4757; border-color: #ff4757; color: white; }
-        .btn-gasto:hover { background-color: #ff6b81; border-color: #ff6b81; color: white; }
-        
-        .btn-ingreso { background-color: #2ed573; border-color: #2ed573; color: white; }
-        .btn-ingreso:hover { background-color: #7bed9f; border-color: #7bed9f; color: white; }
+        /* Colores dinámicos */
+        .btn-gasto { background-color: #ff4757; color: white; border: none; }
+        .btn-ingreso { background-color: #2ed573; color: white; border: none; }
 
-        /* Switch grande */
         .form-check-input { width: 3.5em; height: 1.8em; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container py-4">
-    
     <div class="text-center mb-4">
         <h3 class="fw-bold">💰 Finanzas J&G</h3>
         <p class="text-muted small">Control de Gastos</p>
@@ -34,12 +29,17 @@
 
     <div class="card mb-4">
         <div class="card-body p-4">
-            <form id="financeForm">
+            
+            <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+
+            <form id="financeForm" 
+                  action="https://script.google.com/macros/s/AKfycbxikiPVqWI-gO4d6LCt-sSOFPQaPlS-3DMxnH_915JOGMNRU5kquIva_nPA7kVbdf3CJA/exec" 
+                  method="POST" 
+                  target="hidden_iframe">
                 
                 <div class="mb-3">
                     <label class="form-label fw-bold">¿Quién registra?</label>
-                    <select class="form-select" id="usuario" required>
-                        <option value="Jose">Jose</option>
+                    <select class="form-select" name="usuario"> <option value="Jose">Jose</option>
                         <option value="Gabriela">Gabriela</option>
                     </select>
                 </div>
@@ -47,24 +47,24 @@
                 <div class="row g-2 mb-3">
                     <div class="col-5">
                         <label class="form-label fw-bold">Tipo</label>
-                        <select class="form-select" id="tipo" onchange="actualizarBoton()">
+                        <select class="form-select" name="tipo" id="tipoSelector" onchange="cambiarColor()">
                             <option value="Gasto">Gasto 📉</option>
                             <option value="Ingreso">Ingreso 📈</option>
                         </select>
                     </div>
                     <div class="col-7">
                         <label class="form-label fw-bold">Monto</label>
-                        <input type="number" class="form-control" id="monto" placeholder="0" required inputmode="numeric">
+                        <input type="number" class="form-control" name="monto" placeholder="0" required>
                     </div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label fw-bold">Categoría</label>
-                    <select class="form-select" id="categoria">
+                    <select class="form-select" name="categoria">
                         <option value="Supermercado">🛒 Supermercado</option>
                         <option value="Comida Fuera">🍔 Comida / Delivery</option>
                         <option value="Transporte">🚌 Transporte / Bencina</option>
-                        <option value="Cuentas">💡 Cuentas (Luz/Agua/Net)</option>
+                        <option value="Cuentas">💡 Cuentas (Luz/Agua)</option>
                         <option value="Arriendo">🏠 Arriendo / GC</option>
                         <option value="Mascotas">🐶 Mascotas</option>
                         <option value="Salud">💊 Salud / Farmacia</option>
@@ -74,16 +74,16 @@
                 </div>
 
                 <div class="mb-3">
-                    <input type="text" class="form-control" id="descripcion" placeholder="Descripción (Opcional)">
+                    <input type="text" class="form-control" name="descripcion" placeholder="Descripción (Opcional)">
                 </div>
 
                 <div class="mb-4 p-3 bg-light rounded-3 d-flex justify-content-between align-items-center">
                     <div>
                         <strong class="d-block">¿Es compartido?</strong>
-                        <span class="text-muted small" style="font-size: 0.8rem;">Se divide entre los dos</span>
+                        <span class="text-muted small">Se divide entre los dos</span>
                     </div>
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="es_compartido">
+                        <input class="form-check-input" type="checkbox" name="es_compartido">
                     </div>
                 </div>
 
@@ -93,31 +93,13 @@
             </form>
         </div>
     </div>
-
-    <div class="card">
-        <div class="card-body">
-            <h6 class="card-title text-muted mb-3">Agregados recientemente (Local)</h6>
-            <div class="table-responsive">
-                <table class="table table-borderless align-middle">
-                    <tbody id="tablaCuerpo">
-                        </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
 </div>
 
 <script>
-    // --- CONFIGURACIÓN ---
-    // TU URL REAL (Ya configurada)
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxikiPVqWI-gO4d6LCt-sSOFPQaPlS-3DMxnH_915JOGMNRU5kquIva_nPA7kVbdf3CJA/exec"; 
-
-    // 1. Actualizar color del botón
-    function actualizarBoton() {
-        const tipo = document.getElementById('tipo').value;
+    // Cambiar color del botón
+    function cambiarColor() {
+        const tipo = document.getElementById('tipoSelector').value;
         const btn = document.getElementById('btnSubmit');
-        
         if(tipo === 'Gasto') {
             btn.className = 'btn btn-gasto w-100 btn-lg shadow-sm';
             btn.innerText = 'Registrar Gasto';
@@ -127,81 +109,23 @@
         }
     }
 
-    // 2. Enviar datos a Google Sheet
-    document.getElementById('financeForm').addEventListener('submit', function(e) {
-        e.preventDefault(); // Evita recarga
+    // Detectar cuando se envió el formulario para limpiar campos
+    var iframe = document.getElementById('hidden_iframe');
+    iframe.onload = function() {
+        // Esta función se ejecuta cuando Google responde (aunque sea invisible)
+        // Solo si ya hemos enviado algo (para evitar que salte al cargar la página)
+        if (submitted) {
+            alert("¡Gasto guardado correctamente!");
+            document.getElementById('financeForm').reset();
+            submitted = false;
+        }
+    };
 
-        // Capturar valores
-        const datos = {
-            usuario: document.getElementById('usuario').value,
-            tipo: document.getElementById('tipo').value,
-            monto: document.getElementById('monto').value,
-            categoria: document.getElementById('categoria').value,
-            descripcion: document.getElementById('descripcion').value,
-            es_compartido: document.getElementById('es_compartido').checked
-        };
-
-        // UI Loading
-        const btn = document.getElementById('btnSubmit');
-        const textoOriginal = btn.innerText;
-        btn.disabled = true;
-        btn.innerText = "Guardando...";
-
-        // FETCH REAL (Modo no-cors + text/plain)
-        // Este es el método más robusto para conectar GitHub con Google Sheets
-        fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors', 
-            headers: {
-                'Content-Type': 'text/plain'
-            },
-            body: JSON.stringify(datos)
-        })
-        .then(() => {
-            // Asumimos éxito
-            console.log("Enviado correctamente");
-            agregarFilaVisual(datos);
-            
-            // Limpiar form
-            document.getElementById('monto').value = "";
-            document.getElementById('descripcion').value = "";
-            document.getElementById('es_compartido').checked = false;
-            
-            alert("¡Gasto registrado con éxito!");
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert("Hubo un error al enviar. Revisa la consola.");
-        })
-        .finally(() => {
-            // Restaurar botón
-            btn.disabled = false;
-            btn.innerText = textoOriginal;
-        });
-    });
-
-    // 3. Mostrar en la tabla de abajo (Solo visual)
-    function agregarFilaVisual(d) {
-        const tbody = document.getElementById('tablaCuerpo');
-        const colorMonto = d.tipo === 'Gasto' ? 'text-danger' : 'text-success';
-        const compartidoBadge = d.es_compartido ? '<span class="badge bg-info text-dark">Compartido</span>' : '';
-        
-        const fila = `
-            <tr class="border-bottom">
-                <td>
-                    <div class="fw-bold">${d.categoria}</div>
-                    <div class="small text-muted">${d.usuario} ${compartidoBadge}</div>
-                </td>
-                <td class="text-end ${colorMonto} fw-bold">
-                    $${d.monto}
-                </td>
-            </tr>
-        `;
-        tbody.insertAdjacentHTML('afterbegin', fila);
-    }
-
-    // Iniciar
-    actualizarBoton();
+    var submitted = false;
+    document.getElementById('financeForm').onsubmit = function() {
+        submitted = true;
+        document.getElementById('btnSubmit').innerText = "Guardando...";
+    };
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
