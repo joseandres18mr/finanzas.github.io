@@ -30,34 +30,42 @@
         }
         
         .mokka-img {
-            width: 280px; height: 280px; /* MÁS GRANDE */
-            /* CAMBIO CLAVE: Ya no es 50%, es 40px para que se vea la cara completa */
+            width: 280px; height: 280px; 
             border-radius: 40px; 
             object-fit: cover;
             border: 6px solid white;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            margin-bottom: 25px;
+            margin-bottom: 30px; /* Más espacio abajo */
         }
 
         .login-btn {
-            background: white; border: none; border-radius: 24px;
-            padding: 15px; width: 140px; /* Ajustado para las fotos */
-            box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+            background: white; border: none; border-radius: 30px;
+            /* BOTONES MÁS GRANDES PARA QUE QUEPA TODO */
+            padding: 20px 10px; 
+            width: 160px; 
+            height: auto; /* Altura automática para no cortar texto */
+            min-height: 180px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
             transition: transform 0.2s; cursor: pointer;
-            display: flex; flex-direction: column; align-items: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         .login-btn:active { transform: scale(0.95); }
         
-        /* Estilos para las fotos de perfil redondas */
+        /* FOTOS DE PERFIL MÁS GRANDES */
         .profile-pic {
-            width: 80px; height: 80px;
+            width: 110px; height: 110px; /* Aumentado de 80 a 110 */
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid var(--bg-rosa-suave);
-            margin-bottom: 10px;
+            border: 4px solid var(--bg-rosa-suave);
+            margin-bottom: 15px; /* Espacio entre foto y texto */
         }
 
-        .login-text { font-weight: 800; color: var(--color-acento); font-size: 1.1rem; }
+        .login-text { 
+            font-weight: 900; 
+            color: var(--color-acento); 
+            font-size: 1.3rem; 
+            line-height: 1.2;
+        }
 
         /* APP PRINCIPAL */
         .card { border-radius: 24px; border: none; box-shadow: 0 5px 20px rgba(0,0,0,0.03); background: white; }
@@ -97,21 +105,20 @@
 <body>
 
 <div id="login-screen">
-    <img src="mokka.jpg" alt="Mokkita" class="mokka-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/616/616408.png'">
+    <img src="mokka.jpg?v=2" alt="Mokkita" class="mokka-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/616/616408.png'">
     
     <h1 class="fw-black mb-1" style="color: var(--color-acento);">¡Hola!</h1>
     <p class="mb-5 text-muted fw-bold" style="font-size: 1.1rem;">Soy la Mokkita ahorradora 🐾</p>
     
     <p class="mb-3 fw-bold text-muted">¿Quién eres?</p>
     
-    <div class="d-flex gap-3">
-        <div class="login-btn" onclick="iniciarSesion('Jose', 'Mi papi')">
-            <img src="jose.jpg" class="profile-pic" onerror="this.src='https://cdn-icons-png.flaticon.com/512/236/236831.png'">
+    <div class="d-flex gap-4"> <div class="login-btn" onclick="iniciarSesion('Jose', 'Mi papi')">
+            <img src="jose.jpg?v=2" class="profile-pic" onerror="this.src='https://cdn-icons-png.flaticon.com/512/236/236831.png'">
             <span class="login-text">Mi papi</span>
         </div>
         
         <div class="login-btn" onclick="iniciarSesion('Gabriela', 'Mi mami')">
-            <img src="gabriela.jpg" class="profile-pic" onerror="this.src='https://cdn-icons-png.flaticon.com/512/6997/6997662.png'">
+            <img src="gabriela.jpg?v=2" class="profile-pic" onerror="this.src='https://cdn-icons-png.flaticon.com/512/6997/6997662.png'">
             <span class="login-text">Mi mami</span>
         </div>
     </div>
@@ -253,8 +260,8 @@
         document.getElementById('saludo-usuario').innerText = "¡Hola, " + nombreCorto + "!";
         document.getElementById('subtitulo-usuario').innerText = "Perfil de " + real;
         
-        // INYECTAR FOTO EN EL HEADER SEGÚN QUIÉN SEA
-        const imgFile = (real === 'Jose') ? 'jose.jpg' : 'gabriela.jpg';
+        // INYECTAR FOTO EN EL HEADER CON CACHÉ BUSTING TAMBIÉN
+        const imgFile = (real === 'Jose') ? 'jose.jpg?v=2' : 'gabriela.jpg?v=2';
         document.getElementById('icono-usuario-container').innerHTML = `<img src="${imgFile}" class="header-profile-pic" onerror="this.src='https://cdn-icons-png.flaticon.com/512/847/847969.png'">`;
         
         document.getElementById('usuario-input').value = carino;
@@ -279,149 +286,4 @@
             divComp.style.display = "flex";
         } else {
             btnSubmit.style.backgroundColor = "#4cc9f0";
-            btnSubmit.innerText = "Guardar Ingreso";
-            divComp.style.display = "none";
-            form.es_compartido.checked = false;
-        }
-    }
-
-    form.onsubmit = function() {
-        submitted = true;
-        btnSubmit.innerText = "Guardando...";
-        btnSubmit.disabled = true;
-    };
-
-    document.getElementById('hidden_iframe').onload = function() {
-        if (submitted) {
-            alert("✅ ¡Anotado con éxito!");
-            form.reset();
-            document.getElementById('usuario-input').value = usuarioCari;
-            cambiarColor();
-            btnSubmit.innerText = "Guardar";
-            btnSubmit.disabled = false;
-            submitted = false;
-        }
-    };
-
-    function cargarDatos() {
-        document.getElementById('loading').style.display = 'block';
-        document.getElementById('stats-content').style.display = 'none';
-        
-        fetch(APPS_SCRIPT_URL)
-            .then(r => r.json())
-            .then(data => {
-                datosCompletos = data;
-                const misDatos = data[usuarioApp];
-                const fmt = (n) => "$ " + new Intl.NumberFormat('es-CL').format(n);
-                
-                document.getElementById('mi-ingreso').innerText = fmt(misDatos.ingresos);
-                document.getElementById('mi-gasto').innerText = fmt(misDatos.gastos);
-                document.getElementById('mi-saldo').innerText = fmt(misDatos.saldo);
-
-                const pendientes = misDatos.compartidos.filter(i => i.estado === "IMPAGO").length;
-                const badge = document.getElementById('badge-deudas');
-                if(pendientes > 0) { badge.innerText = pendientes; badge.style.display = 'inline-block'; }
-                else { badge.style.display = 'none'; }
-
-                renderChart(misDatos.desglose);
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('stats-content').style.display = 'block';
-            });
-    }
-
-    function renderChart(desglose) {
-        const ctx = document.getElementById('miChart').getContext('2d');
-        if(myChart) myChart.destroy();
-        const labels = Object.keys(desglose);
-        const vals = labels.map(k => desglose[k].valor);
-
-        myChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{ data: vals, backgroundColor: ['#ffadad', '#ffd6a5', '#fdffb6', '#caffbf', '#9bf6ff', '#a0c4ff', '#bdb2ff', '#ffc6ff'], borderWidth: 2, borderColor: 'white' }]
-            },
-            options: { 
-                responsive: true, maintainAspectRatio: false,
-                layout: { padding: 20 },
-                plugins: { 
-                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { family: 'Nunito', weight: 'bold' } } }
-                },
-                onClick: (e, el) => { if(el.length > 0) abrirDetalle(labels[el[0].index]); }
-            }
-        });
-    }
-
-    function abrirDetalle(cat) {
-        const items = datosCompletos[usuarioApp].desglose[cat].items;
-        const lista = document.getElementById('lista-detalle');
-        document.getElementById('modalTitulo').innerText = cat;
-        lista.innerHTML = "";
-        items.forEach(i => {
-             lista.insertAdjacentHTML('beforeend', `
-                <div class="d-flex justify-content-between border-bottom py-3 align-items-center">
-                    <div><div class="fw-bold text-dark mb-1" style="font-size:1.1rem;">${i.desc}</div><div class="badge bg-light text-muted border">📅 ${i.fecha}</div></div>
-                    <div class="fw-black fs-5" style="color: var(--color-acento)">$ ${new Intl.NumberFormat('es-CL').format(i.monto)}</div>
-                </div>`);
-        });
-        new bootstrap.Modal(document.getElementById('detalleModal')).show();
-    }
-
-    function verCompartidos() {
-        const items = datosCompletos[usuarioApp].compartidos;
-        const lista = document.getElementById('lista-compartidos');
-        lista.innerHTML = "";
-        
-        if(items.length === 0) {
-            lista.innerHTML = "<div class='text-center py-5'><div style='font-size: 3rem;'>🎉</div><h5 class='fw-bold text-muted mt-3'>¡Todo pagado!</h5><p class='text-muted small'>No tienes deudas pendientes.</p></div>";
-        } else {
-            items.forEach(i => {
-                const pagado = i.estado === "PAGADO";
-                const html = `
-                <div class="shared-item ${pagado ? 'pagado' : ''}" id="card-${i.id}">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="badge bg-white text-muted border fw-bold">📅 ${i.fecha}</span>
-                        <span class="badge ${pagado?'bg-success':'bg-danger'} fw-bold px-3">${pagado?'PAGADO ✅':'POR PAGAR ❌'}</span>
-                    </div>
-                    <h6 class="fw-black mb-1" style="font-size: 1.1rem; color: var(--color-texto);">${i.desc}</h6>
-                    <small class="text-muted fw-bold">Pagó: <span style="color: var(--color-acento);">${i.acreedor}</span></small>
-                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                        <div><small class="text-muted fw-bold d-block">Tu parte:</small><div class="fw-black fs-5" style="color: #555">$${new Intl.NumberFormat('es-CL').format(i.miParte)}</div></div>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" style="width:3.5em; height:2em; cursor:pointer;" 
-                                   onchange="pagar('${i.id}', this)" ${pagado ? 'checked disabled' : ''}>
-                        </div>
-                    </div>
-                </div>`;
-                lista.insertAdjacentHTML('beforeend', html);
-            });
-        }
-        new bootstrap.Modal(document.getElementById('compartidosModal')).show();
-    }
-
-    function pagar(id, check) {
-        if(!confirm("¿Confirmar que ya pagaste esto? 💸")) { check.checked = false; return; }
-        check.disabled = true;
-        document.getElementById('card-'+id).style.opacity = '0.5';
-        const payload = JSON.stringify({ accion: "actualizar_estado", id: String(id) });
-        fetch(APPS_SCRIPT_URL, {
-            method: 'POST', mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain' },
-            body: payload
-        }).then(() => {
-            const c = document.getElementById('card-'+id);
-            c.classList.add('pagado');
-            c.querySelector('.badge.bg-danger').className = "badge bg-success fw-bold px-3";
-            c.querySelector('.badge.bg-success').innerText = "PAGADO ✅";
-            c.style.opacity = '1';
-            const badge = document.getElementById('badge-deudas');
-            let count = parseInt(badge.innerText) || 0;
-            if(count > 0) badge.innerText = count - 1;
-            if(count - 1 <= 0) badge.style.display = 'none';
-            alert("¡Listo! Deuda saldada 🐶");
-        }).catch(e => { alert("Error de conexión"); check.disabled = false; c.style.opacity = '1'; });
-    }
-</script>
-
-</body>
-</html>
+            btnSubmit.innerText = "
