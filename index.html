@@ -29,9 +29,10 @@
         .bg-gasto { background: linear-gradient(45deg, #ff4757, #ff6b81); }
         .bg-saldo { background: linear-gradient(45deg, #1e90ff, #70a1ff); }
 
-        .shared-item { background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px; border-left: 5px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .shared-item { background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px; border-left: 5px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: all 0.3s; }
         .shared-item.pagado { border-left-color: #2ed573; opacity: 0.6; }
         .shared-item.impago { border-left-color: #ff4757; }
+        .badge-status { font-size: 0.7rem; padding: 4px 8px; border-radius: 6px; }
     </style>
 </head>
 <body>
@@ -63,9 +64,11 @@
             <div class="card">
                 <div class="card-body p-4">
                     <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+                    
                     <form id="financeForm" 
                           action="https://script.google.com/macros/s/AKfycbz2hTiT_DCceJkzh0_rMjy0EJkbDAgXEyztYAVNNMIAkb4CwQC1ySajrmmB8U7KO8ubuQ/exec" 
                           method="POST" target="hidden_iframe">
+                        
                         <input type="hidden" name="usuario" id="usuario-input">
                         <div class="row g-2 mb-3">
                             <div class="col-5">
@@ -106,7 +109,7 @@
         <div class="tab-pane fade" id="graficos-pane">
             <div id="loading" class="text-center py-5">
                 <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Cargando...</p>
+                <p class="mt-2 text-muted">Calculando saldos...</p>
             </div>
 
             <div id="stats-content" style="display:none;">
@@ -118,7 +121,7 @@
 
                 <div class="d-grid gap-2 mb-4">
                     <button class="btn btn-warning shadow-sm py-3 fw-bold text-dark position-relative" onclick="verCompartidos()">
-                        💸 Pagar Deudas
+                        💸 Pagar Deudas Pendientes
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="badge-deudas" style="display:none">0</span>
                     </button>
                 </div>
@@ -141,7 +144,7 @@
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content" style="background-color: #f8f9fa;">
             <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold">💸 Tus Deudas por Pagar</h5>
+                <h5 class="modal-title fw-bold">💸 Deudas con tu Pareja</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body pt-0">
@@ -153,7 +156,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // !!! PEGA TU URL AQUI !!!
+    // !!! PEGA TU URL NUEVA AQUI !!!
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz2hTiT_DCceJkzh0_rMjy0EJkbDAgXEyztYAVNNMIAkb4CwQC1ySajrmmB8U7KO8ubuQ/exec";
     
     let usuarioActual = "";
@@ -223,7 +226,7 @@
                 document.getElementById('mi-gasto').innerText = fmt(datosUsuario.gastos);
                 document.getElementById('mi-saldo').innerText = fmt(datosUsuario.saldo);
 
-                // Actualizar contador de deudas pendientes
+                // Solo contar IMPAGOS para el badge rojo
                 const pendientes = datosUsuario.compartidos.filter(i => i.estado === "IMPAGO").length;
                 const badge = document.getElementById('badge-deudas');
                 if (pendientes > 0) {
@@ -237,7 +240,7 @@
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('stats-content').style.display = 'block';
             })
-            .catch(error => { console.error(error); });
+            .catch(error => { console.error(error); document.getElementById('loading').innerHTML = "<br>Error de conexión"; });
     }
 
     function mostrarGrafico(desglose) {
@@ -258,8 +261,7 @@
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                responsive: true, maintainAspectRatio: false,
                 onClick: (evt, elements) => {
                     if(elements.length > 0) {
                         const index = elements[0].index;
@@ -289,7 +291,7 @@
         lista.innerHTML = "";
 
         if (items.length === 0) {
-            lista.innerHTML = "<p class='text-center text-muted py-3'>🎉 ¡Estás al día! No le debes nada a nadie.</p>";
+            lista.innerHTML = "<p class='text-center text-muted py-3'>🎉 ¡No tienes deudas pendientes!</p>";
         } else {
             items.forEach(item => {
                 const parteFmt = new Intl.NumberFormat('es-CL').format(item.miParte);
@@ -297,7 +299,9 @@
                 const claseEstado = esPagado ? "pagado" : "impago";
                 const textoEstado = esPagado ? "PAGADO ✅" : "IMPAGO ❌";
                 const checkAttr = esPagado ? "checked disabled" : "";
-                const quienPago = item.acreedor; // A quién le debo
+                
+                // Texto explicativo claro
+                const explicacion = `Le debes a <strong>${item.acreedor}</strong>`;
 
                 const html = `
                     <div class="shared-item ${claseEstado}" id="card-${item.id}">
@@ -306,9 +310,9 @@
                             <span class="badge ${esPagado ? 'bg-success' : 'bg-danger'} badge-status">${textoEstado}</span>
                         </div>
                         <h6 class="fw-bold mb-1">${item.desc}</h6>
-                        <small class="text-muted d-block mb-2">Pagado por: <strong>${quienPago}</strong></small>
+                        <small class="text-muted d-block mb-2">${explicacion}</small>
                         <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded">
-                            <div class="fw-bold text-dark">A pagar: $${parteFmt}</div>
+                            <div class="fw-bold text-dark">Tu parte: $${parteFmt}</div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" style="width:3em; height:1.5em;" 
                                        onchange="marcarPagado('${item.id}', this)" ${checkAttr}>
@@ -323,40 +327,40 @@
     }
 
     function marcarPagado(id, checkbox) {
-        if (!confirm("¿Confirmar pago?")) { checkbox.checked = false; return; }
+        if (!confirm("¿Ya le pagaste esto a tu pareja?")) { checkbox.checked = false; return; }
         
-        checkbox.disabled = true; // Bloquear para no doble click
-        document.getElementById(`card-${id}`).style.opacity = "0.5";
+        checkbox.disabled = true;
+        const card = document.getElementById(`card-${id}`);
+        card.style.opacity = "0.5";
 
-        const payload = { accion: "actualizar_estado", id: id };
+        // Aseguramos que el ID se envíe como string
+        const payload = { accion: "actualizar_estado", id: String(id) };
         
-        // Enviamos petición con no-cors (no podemos leer respuesta pero confiamos)
         fetch(APPS_SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         }).then(() => {
-            // Actualización visual optimista
-            const card = document.getElementById(`card-${id}`);
+            // Éxito Visual
             card.classList.remove('impago'); 
             card.classList.add('pagado');
             card.querySelector('.badge-status').className = "badge bg-success badge-status";
             card.querySelector('.badge-status').innerText = "PAGADO ✅";
             card.style.opacity = "0.7";
             
-            // Restar del contador del botón
+            // Actualizar badge
             const badge = document.getElementById('badge-deudas');
             let count = parseInt(badge.innerText) || 0;
             if(count > 0) badge.innerText = count - 1;
             if(count - 1 <= 0) badge.style.display = 'none';
 
-            alert("✅ Pago registrado correctamente.");
+            alert("✅ ¡Pago registrado correctamente!");
         }).catch(e => {
-            alert("Hubo un error de conexión, intenta de nuevo.");
+            alert("Error de conexión. Intenta de nuevo.");
             checkbox.disabled = false;
             checkbox.checked = false;
-            document.getElementById(`card-${id}`).style.opacity = "1";
+            card.style.opacity = "1";
         });
     }
 </script>
