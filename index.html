@@ -21,19 +21,19 @@
             color: var(--color-texto);
         }
         
-        /* LOGIN CON SCROLL */
+        /* LOGIN CON SCROLL HABILITADO */
         #login-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(180deg, #ffe4d1 0%, #fff9f0 100%);
             z-index: 9999; 
-            overflow-y: auto; /* Scroll habilitado */
+            overflow-y: auto; /* Permite bajar si la pantalla es chica */
             display: flex; align-items: center; justify-content: center;
         }
 
         .login-content {
             width: 100%; max-width: 600px; padding: 40px 20px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 100%;
+            min-height: 100%; /* Asegura que ocupe la pantalla */
         }
         
         .mokka-img {
@@ -42,23 +42,29 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 20px;
         }
 
+        /* VOLVEMOS A USAR DIV PARA EL BOTÓN (MÁS SEGURO) */
         .login-btn {
-            background: white; border: none; border-radius: 30px;
-            padding: 20px 10px; width: 160px; min-height: 180px;
+            background: white; 
+            border-radius: 30px;
+            padding: 20px 10px; 
+            width: 160px; 
+            min-height: 180px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-            transition: transform 0.2s; cursor: pointer;
+            transition: transform 0.2s; 
+            cursor: pointer;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             margin: 10px;
+            user-select: none; /* Evita que se seleccione el texto al hacer click */
         }
-        .login-btn:active { transform: scale(0.95); }
+        .login-btn:active { transform: scale(0.95); background-color: #f8f9fa; }
         
         .profile-pic {
             width: 110px; height: 110px; border-radius: 50%;
             object-fit: cover; border: 4px solid var(--bg-rosa-suave); margin-bottom: 15px; 
-            pointer-events: none;
+            pointer-events: none; /* El click pasa a través de la imagen hacia el botón */
         }
 
-        .login-text { font-weight: 900; color: var(--color-acento); font-size: 1.3rem; }
+        .login-text { font-weight: 900; color: var(--color-acento); font-size: 1.3rem; pointer-events: none; }
 
         /* APP */
         .card { border-radius: 24px; border: none; box-shadow: 0 5px 20px rgba(0,0,0,0.03); background: white; }
@@ -89,7 +95,7 @@
             object-fit: cover; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        /* --- NUEVO: ANIMACIÓN DE TITILEO (PULSE) --- */
+        /* ANIMACIÓN TITILANTE */
         @keyframes latido {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
             70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
@@ -97,18 +103,12 @@
         }
 
         .badge-titilante {
-            position: absolute;
-            right: 20px; /* Alineado a la derecha DENTRO del botón */
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: #dc3545; /* Rojo fuerte */
-            color: white;
-            border-radius: 50%;
-            width: 35px; height: 35px;
+            position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
+            background-color: #dc3545; color: white;
+            border-radius: 50%; width: 35px; height: 35px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 1rem; font-weight: 900;
-            border: 2px solid white;
-            animation: latido 1.5s infinite; /* Aquí está la magia */
+            font-size: 1rem; font-weight: 900; border: 2px solid white;
+            animation: latido 1.5s infinite;
         }
     </style>
 </head>
@@ -120,15 +120,17 @@
         <h1 class="fw-black mb-1" style="color: var(--color-acento);">¡Hola!</h1>
         <p class="mb-4 text-muted fw-bold" style="font-size: 1.1rem;">Soy la Mokkita ahorradora 🐾</p>
         <p class="mb-3 fw-bold text-muted">¿Quién eres?</p>
+        
         <div class="d-flex flex-wrap justify-content-center gap-3">
-            <button class="login-btn" onclick="iniciarSesion('Jose', 'Mi papi')">
+            <div class="login-btn" onclick="iniciarSesion('Jose', 'Mi papi')">
                 <img src="jose.jpg?v=3" class="profile-pic" onerror="this.src='https://cdn-icons-png.flaticon.com/512/236/236831.png'">
                 <span class="login-text">Mi papi</span>
-            </button>
-            <button class="login-btn" onclick="iniciarSesion('Gabriela', 'Mi mami')">
+            </div>
+            
+            <div class="login-btn" onclick="iniciarSesion('Gabriela', 'Mi mami')">
                 <img src="gabriela.jpg?v=3" class="profile-pic" onerror="this.src='https://cdn-icons-png.flaticon.com/512/6997/6997662.png'">
                 <span class="login-text">Mi mami</span>
-            </button>
+            </div>
         </div>
     </div>
 </div>
@@ -232,3 +234,127 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz2hTiT_DCceJkzh0_rMjy0EJkbDAgXEyztYAVNNMIAkb4CwQC1ySajrmmB8U7KO8ubuQ/exec";
+    let usuarioApp = "", usuarioCari = "", myChart = null, datosCompletos = null;
+
+    function iniciarSesion(real, carino) {
+        usuarioApp = real; usuarioCari = carino;
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app-screen').style.display = 'block';
+        let nombreCorto = carino.split(" ")[1];
+        nombreCorto = nombreCorto.charAt(0).toUpperCase() + nombreCorto.slice(1);
+        document.getElementById('saludo-usuario').innerText = "¡Hola, " + nombreCorto + "!";
+        document.getElementById('subtitulo-usuario').innerText = "Perfil de " + real;
+        const imgFile = (real === 'Jose') ? 'jose.jpg?v=3' : 'gabriela.jpg?v=3';
+        document.getElementById('icono-usuario-container').innerHTML = `<img src="${imgFile}" class="header-profile-pic" onerror="this.src='https://cdn-icons-png.flaticon.com/512/847/847969.png'">`;
+        document.getElementById('usuario-input').value = carino;
+    }
+
+    const montoInput = document.getElementById('monto');
+    const form = document.getElementById('financeForm');
+    const btnSubmit = document.getElementById('btnSubmit');
+    var submitted = false;
+
+    montoInput.addEventListener('input', (e) => {
+        let val = e.target.value.replace(/\D/g, "");
+        e.target.value = val ? new Intl.NumberFormat('es-CL').format(val) : "";
+    });
+
+    function cambiarColor() {
+        const tipo = document.getElementById('tipoSelector').value;
+        const divComp = document.getElementById('div-compartido');
+        if(tipo === 'Gasto') {
+            btnSubmit.style.backgroundColor = "var(--color-acento)";
+            btnSubmit.innerText = "Guardar Gasto";
+            divComp.style.display = "flex";
+        } else {
+            btnSubmit.style.backgroundColor = "#4cc9f0";
+            btnSubmit.innerText = "Guardar Ingreso";
+            divComp.style.display = "none";
+            form.es_compartido.checked = false;
+        }
+    }
+
+    form.onsubmit = function() { submitted = true; btnSubmit.innerText = "Guardando..."; btnSubmit.disabled = true; };
+    document.getElementById('hidden_iframe').onload = function() {
+        if (submitted) { alert("✅ ¡Anotado con éxito!"); form.reset(); document.getElementById('usuario-input').value = usuarioCari; cambiarColor(); btnSubmit.innerText = "Guardar"; btnSubmit.disabled = false; submitted = false; }
+    };
+
+    function cargarDatos() {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('stats-content').style.display = 'none';
+        fetch(APPS_SCRIPT_URL).then(r => r.json()).then(data => {
+            datosCompletos = data;
+            const misDatos = data[usuarioApp];
+            const fmt = (n) => "$ " + new Intl.NumberFormat('es-CL').format(n);
+            document.getElementById('mi-ingreso').innerText = fmt(misDatos.ingresos);
+            document.getElementById('mi-gasto').innerText = fmt(misDatos.gastos);
+            document.getElementById('mi-saldo').innerText = fmt(misDatos.saldo);
+            
+            const pendientes = misDatos.compartidos.filter(i => i.estado === "IMPAGO").length;
+            const badge = document.getElementById('badge-deudas');
+            if(pendientes > 0) { 
+                badge.innerText = pendientes; 
+                badge.style.display = 'flex'; 
+            } else { 
+                badge.style.display = 'none'; 
+            }
+
+            renderChart(misDatos.desglose);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('stats-content').style.display = 'block';
+        });
+    }
+
+    function renderChart(desglose) {
+        const ctx = document.getElementById('miChart').getContext('2d');
+        if(myChart) myChart.destroy();
+        const labels = Object.keys(desglose);
+        const vals = labels.map(k => desglose[k].valor);
+        myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: { labels: labels, datasets: [{ data: vals, backgroundColor: ['#ffadad', '#ffd6a5', '#fdffb6', '#caffbf', '#9bf6ff', '#a0c4ff', '#bdb2ff', '#ffc6ff'], borderWidth: 2, borderColor: 'white' }] },
+            options: { responsive: true, maintainAspectRatio: false, layout: { padding: 20 }, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { family: 'Nunito', weight: 'bold' } } } }, onClick: (e, el) => { if(el.length > 0) abrirDetalle(labels[el[0].index]); } }
+        });
+    }
+
+    function abrirDetalle(cat) {
+        const items = datosCompletos[usuarioApp].desglose[cat].items;
+        const lista = document.getElementById('lista-detalle');
+        document.getElementById('modalTitulo').innerText = cat;
+        lista.innerHTML = "";
+        items.forEach(i => { lista.insertAdjacentHTML('beforeend', `<div class="d-flex justify-content-between border-bottom py-3 align-items-center"><div><div class="fw-bold text-dark mb-1" style="font-size:1.1rem;">${i.desc}</div><div class="badge bg-light text-muted border">📅 ${i.fecha}</div></div><div class="fw-black fs-5" style="color: var(--color-acento)">$ ${new Intl.NumberFormat('es-CL').format(i.monto)}</div></div>`); });
+        new bootstrap.Modal(document.getElementById('detalleModal')).show();
+    }
+
+    function verCompartidos() {
+        const items = datosCompletos[usuarioApp].compartidos;
+        const lista = document.getElementById('lista-compartidos');
+        lista.innerHTML = "";
+        if(items.length === 0) { lista.innerHTML = "<div class='text-center py-5'><div style='font-size: 3rem;'>🎉</div><h5 class='fw-bold text-muted mt-3'>¡Todo pagado!</h5><p class='text-muted small'>No tienes deudas pendientes.</p></div>"; } 
+        else {
+            items.forEach(i => {
+                const pagado = i.estado === "PAGADO";
+                const html = `<div class="shared-item ${pagado ? 'pagado' : ''}" id="card-${i.id}"><div class="d-flex justify-content-between mb-2"><span class="badge bg-white text-muted border fw-bold">📅 ${i.fecha}</span><span class="badge ${pagado?'bg-success':'bg-danger'} fw-bold px-3">${pagado?'PAGADO ✅':'POR PAGAR ❌'}</span></div><h6 class="fw-black mb-1" style="font-size: 1.1rem; color: var(--color-texto);">${i.desc}</h6><small class="text-muted fw-bold">Pagó: <span style="color: var(--color-acento);">${i.acreedor}</span></small><div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top"><div><small class="text-muted fw-bold d-block">Tu parte:</small><div class="fw-black fs-5" style="color: #555">$${new Intl.NumberFormat('es-CL').format(i.miParte)}</div></div><div class="form-check form-switch"><input class="form-check-input" type="checkbox" style="width:3.5em; height:2em; cursor:pointer;" onchange="pagar('${i.id}', this)" ${pagado ? 'checked disabled' : ''}></div></div></div>`;
+                lista.insertAdjacentHTML('beforeend', html);
+            });
+        }
+        new bootstrap.Modal(document.getElementById('compartidosModal')).show();
+    }
+
+    function pagar(id, check) {
+        if(!confirm("¿Confirmar que ya pagaste esto? 💸")) { check.checked = false; return; }
+        check.disabled = true; document.getElementById('card-'+id).style.opacity = '0.5';
+        const payload = JSON.stringify({ accion: "actualizar_estado", id: String(id) });
+        fetch(APPS_SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: payload }).then(() => {
+            const c = document.getElementById('card-'+id); c.classList.add('pagado');
+            c.querySelector('.badge.bg-danger').className = "badge bg-success fw-bold px-3"; c.querySelector('.badge.bg-success').innerText = "PAGADO ✅"; c.style.opacity = '1';
+            const badge = document.getElementById('badge-deudas'); let count = parseInt(badge.innerText) || 0;
+            if(count > 0) badge.innerText = count - 1; if(count - 1 <= 0) badge.style.display = 'none';
+            alert("¡Listo! Deuda saldada 🐶");
+        }).catch(e => { alert("Error de conexión"); check.disabled = false; c.style.opacity = '1'; });
+    }
+</script>
+
+</body>
+</html>
