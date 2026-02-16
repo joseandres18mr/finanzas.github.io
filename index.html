@@ -9,34 +9,64 @@
     <style>
         body { background-color: #f0f2f5; font-family: system-ui, -apple-system, sans-serif; }
         .card { border-radius: 16px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .form-control, .form-select { border-radius: 12px; padding: 12px; }
-        .btn-lg { border-radius: 12px; font-weight: 600; }
-        .nav-pills .nav-link.active { background-color: #333; color: white; border-radius: 10px; }
-        .nav-pills .nav-link { color: #666; }
+        .form-control, .form-select { border-radius: 12px; padding: 12px; font-size: 1rem; }
+        .btn-lg { border-radius: 12px; font-weight: 600; padding: 14px; }
         
-        /* Colores */
-        .bg-jose { background-color: #3498db; color: white; }
-        .bg-gaby { background-color: #e84393; color: white; }
+        /* Pantalla de Login */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 9999; display: flex; align-items: center; justify-content: center;
+        }
+        
+        /* Avatares de Login */
+        .avatar-btn {
+            width: 120px; height: 120px; border-radius: 50%; border: 4px solid white;
+            background-color: white; font-size: 3rem; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .avatar-btn:active { transform: scale(0.95); }
         
         .stat-card { transition: transform 0.2s; }
-        .stat-card:active { transform: scale(0.98); }
     </style>
 </head>
 <body>
 
-<div class="container py-3" style="max-width: 600px;">
+<div id="login-screen">
+    <div class="text-center text-white">
+        <h1 class="fw-bold mb-4">💰 Finanzas J&G</h1>
+        <p class="mb-5 opacity-75">¿Quién está registrando?</p>
+        
+        <div class="d-flex gap-4 justify-content-center">
+            <div class="text-center">
+                <div class="avatar-btn text-primary mb-2" onclick="iniciarSesion('Jose')">👨🏻‍💻</div>
+                <div class="fw-bold">Jose</div>
+            </div>
+            
+            <div class="text-center">
+                <div class="avatar-btn text-danger mb-2" onclick="iniciarSesion('Gabriela')">👩🏻‍🎨</div>
+                <div class="fw-bold">Gabriela</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="app-screen" class="container py-3" style="max-width: 600px; display:none;">
     
-    <div class="text-center mb-3">
-        <h3 class="fw-bold m-0">💰 Finanzas J&G</h3>
-        <p class="text-muted small">Control Mensual</p>
+    <div class="d-flex justify-content-between align-items-center mb-3 px-2">
+        <div>
+            <h3 class="fw-bold m-0" id="saludo-usuario">Hola!</h3>
+            <small class="text-muted">Control de Gastos Mensual</small>
+        </div>
+        <button class="btn btn-outline-secondary btn-sm rounded-pill" onclick="cerrarSesion()">Salir</button>
     </div>
 
     <ul class="nav nav-pills nav-fill mb-3 bg-white p-1 rounded-3 shadow-sm" id="myTab" role="tablist">
-        <li class="nav-item" role="presentation">
+        <li class="nav-item">
             <button class="nav-link active fw-bold" id="registro-tab" data-bs-toggle="tab" data-bs-target="#registro-pane" type="button">📝 Registrar</button>
         </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link fw-bold" id="graficos-tab" data-bs-toggle="tab" data-bs-target="#graficos-pane" type="button" onclick="cargarDatos()">📊 Gráficos</button>
+        <li class="nav-item">
+            <button class="nav-link fw-bold" id="graficos-tab" data-bs-toggle="tab" data-bs-target="#graficos-pane" type="button" onclick="cargarDatos()">📊 Mis Gastos</button>
         </li>
     </ul>
 
@@ -51,24 +81,18 @@
                           action="https://script.google.com/macros/s/AKfycbz2hTiT_DCceJkzh0_rMjy0EJkbDAgXEyztYAVNNMIAkb4CwQC1ySajrmmB8U7KO8ubuQ/exec" 
                           method="POST" target="hidden_iframe">
                         
-                        <div class="mb-3">
-                            <label class="fw-bold">¿Quién registra?</label>
-                            <select class="form-select" name="usuario">
-                                <option value="Jose">Jose</option>
-                                <option value="Gabriela">Gabriela</option>
-                            </select>
-                        </div>
+                        <input type="hidden" name="usuario" id="usuario-input">
 
                         <div class="row g-2 mb-3">
                             <div class="col-5">
-                                <label class="fw-bold">Tipo</label>
+                                <label class="fw-bold small text-muted">TIPO</label>
                                 <select class="form-select" name="tipo" id="tipoSelector" onchange="cambiarColor()">
                                     <option value="Gasto">Gasto 📉</option>
                                     <option value="Ingreso">Ingreso 📈</option>
                                 </select>
                             </div>
                             <div class="col-7">
-                                <label class="fw-bold">Monto</label>
+                                <label class="fw-bold small text-muted">MONTO</label>
                                 <div class="input-group">
                                     <span class="input-group-text border-0 bg-light">$</span>
                                     <input type="text" class="form-control" name="monto" id="monto" placeholder="0" required inputmode="numeric">
@@ -77,7 +101,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="fw-bold">Categoría</label>
+                            <label class="fw-bold small text-muted">CATEGORÍA</label>
                             <select class="form-select" name="categoria">
                                 <option value="Supermercado">🛒 Supermercado</option>
                                 <option value="Comida Fuera">🍔 Comida / Delivery</option>
@@ -97,17 +121,21 @@
 
                         <div class="alert alert-light border d-flex justify-content-between align-items-center">
                             <div>
-                                <strong class="d-block">¿Es compartido?</strong>
-                                <span class="text-muted small">Se divide 50/50 en los gráficos</span>
+                                <strong class="d-block small">¿Compartido? (50/50)</strong>
                             </div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" name="es_compartido">
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-danger w-100 btn-lg shadow-sm" id="btnSubmit">Registrar Gasto</button>
+                        <button type="submit" class="btn btn-danger w-100 btn-lg shadow-sm" id="btnSubmit">Registrar</button>
                     </form>
                 </div>
+            </div>
+            
+            <div class="mt-3 text-center">
+                <small class="text-muted">Últimos registros de esta sesión:</small>
+                <div id="historial" class="mt-2"></div>
             </div>
         </div>
 
@@ -115,58 +143,69 @@
             
             <div id="loading" class="text-center py-5">
                 <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Calculando gastos del mes...</p>
+                <p class="mt-2 text-muted">Consultando tu deuda...</p>
             </div>
 
             <div id="stats-content" style="display:none;">
                 
-                <div class="card mb-3 stat-card">
+                <div class="card mb-3 stat-card bg-white border border-primary border-opacity-25">
+                    <div class="card-body text-center pt-4">
+                        <small class="text-uppercase text-muted fw-bold">Total Gastado este Mes</small>
+                        <h1 class="display-4 fw-bold text-primary my-2" id="mi-total">$0</h1>
+                        <p class="small text-muted mb-0">(Incluye tus gastos + la mitad de lo compartido)</p>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="fw-bold m-0 text-primary">Jose</h5>
-                            <span class="badge bg-primary rounded-pill" id="total-jose">$0</span>
-                        </div>
-                        <div style="height:200px; position:relative;">
-                            <canvas id="chartJose"></canvas>
+                        <h6 class="fw-bold mb-3">Distribución de Gastos</h6>
+                        <div style="height:250px; position:relative;">
+                            <canvas id="miChart"></canvas>
                         </div>
                     </div>
                 </div>
 
-                <div class="card mb-3 stat-card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="fw-bold m-0 text-danger">Gabriela</h5>
-                            <span class="badge bg-danger rounded-pill" id="total-gaby">$0</span>
-                        </div>
-                        <div style="height:200px; position:relative;">
-                            <canvas id="chartGaby"></canvas>
-                        </div>
-                    </div>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-light border" onclick="cargarDatos()">🔄 Actualizar mis datos</button>
                 </div>
-
-                <div class="alert alert-info small text-center">
-                    <i class="bi bi-info-circle"></i> Los gastos compartidos ya están divididos a la mitad en cada gráfico.
-                </div>
-                
-                <button class="btn btn-outline-secondary w-100 btn-sm" onclick="cargarDatos()">🔄 Actualizar datos</button>
             </div>
         </div>
     </div>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // URL DEL SCRIPT (Debe ser la misma del form)
+    // --- 1. CONFIGURACIÓN ---
+    // !!! IMPORTANTE: PON TU URL DEL SCRIPT AQUÍ !!!
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz2hTiT_DCceJkzh0_rMjy0EJkbDAgXEyztYAVNNMIAkb4CwQC1ySajrmmB8U7KO8ubuQ/exec";
+    
+    let usuarioActual = "";
+    let myChart = null;
 
-    // --- 1. LÓGICA DE REGISTRO (Tuya original mejorada) ---
+    // --- 2. SISTEMA DE LOGIN ---
+    function iniciarSesion(nombre) {
+        usuarioActual = nombre;
+        
+        // Ocultar login, mostrar app
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app-screen').style.display = 'block';
+        
+        // Personalizar interfaz
+        document.getElementById('saludo-usuario').innerText = "Hola, " + nombre + "!";
+        document.getElementById('usuario-input').value = nombre; // Llenar input oculto
+    }
+
+    function cerrarSesion() {
+        location.reload(); // Recargar página para volver al login
+    }
+
+    // --- 3. LÓGICA DE REGISTRO ---
     const montoInput = document.getElementById('monto');
     const form = document.getElementById('financeForm');
     const btnSubmit = document.getElementById('btnSubmit');
     var submitted = false;
 
-    // Formato miles
+    // Formato CLP (Puntos de miles)
     montoInput.addEventListener('input', (e) => {
         let value = e.target.value.replace(/\D/g, "");
         e.target.value = value ? new Intl.NumberFormat('es-CL').format(value) : "";
@@ -191,8 +230,14 @@
 
     document.getElementById('hidden_iframe').onload = function() {
         if (submitted) {
-            alert("✅ ¡Guardado!");
+            // Historial visual rápido
+            agregarHistorialVisual(form.categoria.value, form.monto.value, form.tipo.value);
+            
+            alert("✅ ¡Registrado correctamente!");
             form.reset();
+            
+            // Restaurar usuario y botón
+            document.getElementById('usuario-input').value = usuarioActual;
             btnSubmit.innerText = "Registrar Gasto";
             btnSubmit.disabled = false;
             submitted = false;
@@ -200,11 +245,14 @@
         }
     };
 
+    function agregarHistorialVisual(cat, monto, tipo) {
+        const color = tipo === 'Gasto' ? 'text-danger' : 'text-success';
+        const html = `<div class="badge bg-light text-dark border me-1 mb-1">${cat}: <span class="${color}">$${monto}</span></div>`;
+        document.getElementById('historial').insertAdjacentHTML('afterbegin', html);
+    }
 
-    // --- 2. LÓGICA DE GRÁFICOS (Nueva) ---
-    let myChartJose = null;
-    let myChartGaby = null;
 
+    // --- 4. LÓGICA DE GRÁFICOS (FILTRADO POR USUARIO) ---
     function cargarDatos() {
         document.getElementById('loading').style.display = 'block';
         document.getElementById('stats-content').style.display = 'none';
@@ -212,65 +260,48 @@
         fetch(APPS_SCRIPT_URL)
             .then(response => response.json())
             .then(data => {
-                mostrarGraficos(data);
+                // Filtramos SOLO los datos del usuario logueado
+                const datosUsuario = data[usuarioActual];
+                mostrarGraficoPersonal(datosUsuario);
+                
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('stats-content').style.display = 'block';
             })
             .catch(error => {
-                console.error("Error cargando gráficos:", error);
-                alert("Error cargando datos. Revisa la consola.");
-                document.getElementById('loading').style.display = 'none';
+                console.error("Error:", error);
+                document.getElementById('loading').innerHTML = "<p class='text-danger'>Error de conexión</p>";
             });
     }
 
-    function mostrarGraficos(data) {
-        // Formateador de dinero
-        const fmt = (num) => "$ " + new Intl.NumberFormat('es-CL').format(num);
+    function mostrarGraficoPersonal(datos) {
+        // Actualizar Total Grande
+        document.getElementById('mi-total').innerText = "$ " + new Intl.NumberFormat('es-CL').format(datos.total);
 
-        // Actualizar totales texto
-        document.getElementById('total-jose').innerText = fmt(data.Jose.total);
-        document.getElementById('total-gaby').innerText = fmt(data.Gabriela.total);
+        // Preparar Gráfico
+        const ctx = document.getElementById('miChart').getContext('2d');
+        if (myChart) myChart.destroy();
 
-        // Renderizar Chart Jose
-        renderChart('chartJose', data.Jose.desglose, 'Jose', myChartJose, (c) => myChartJose = c);
-        
-        // Renderizar Chart Gabriela
-        renderChart('chartGaby', data.Gabriela.desglose, 'Gabriela', myChartGaby, (c) => myChartGaby = c);
-    }
+        // Colores
+        const colors = ['#ff7675', '#74b9ff', '#ffeaa7', '#55efc4', '#a29bfe', '#fab1a0', '#00b894', '#636e72'];
 
-    function renderChart(canvasId, desglose, persona, chartInstance, setChart) {
-        const ctx = document.getElementById(canvasId).getContext('2d');
-        
-        // Destruir gráfico anterior si existe
-        if (chartInstance) chartInstance.destroy();
-
-        const labels = Object.keys(desglose);
-        const values = Object.values(desglose);
-        
-        // Colores bonitos
-        const colors = [
-            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#2ecc71', '#e74c3c'
-        ];
-
-        const newChart = new Chart(ctx, {
+        myChart = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: labels,
+                labels: Object.keys(datos.desglose),
                 datasets: [{
-                    data: values,
+                    data: Object.values(datos.desglose),
                     backgroundColor: colors,
-                    borderWidth: 1
+                    borderWidth: 0
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'right', labels: { boxWidth: 12, font: { size: 10 } } }
+                    legend: { position: 'bottom' }
                 }
             }
         });
-        setChart(newChart);
     }
 </script>
 
