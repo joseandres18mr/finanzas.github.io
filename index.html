@@ -30,8 +30,9 @@
         }
         
         .mokka-img {
-            width: 260px; height: 260px; 
-            border-radius: 50%; 
+            width: 280px; height: 280px; /* MÁS GRANDE */
+            /* CAMBIO CLAVE: Ya no es 50%, es 40px para que se vea la cara completa */
+            border-radius: 40px; 
             object-fit: cover;
             border: 6px solid white;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
@@ -40,13 +41,23 @@
 
         .login-btn {
             background: white; border: none; border-radius: 24px;
-            padding: 20px; width: 150px;
+            padding: 15px; width: 140px; /* Ajustado para las fotos */
             box-shadow: 0 6px 15px rgba(0,0,0,0.05);
             transition: transform 0.2s; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center;
         }
         .login-btn:active { transform: scale(0.95); }
-        .login-emoji { font-size: 3.8rem; display: block; margin-bottom: 5px; }
-        .login-text { font-weight: 800; color: var(--color-acento); font-size: 1.2rem; }
+        
+        /* Estilos para las fotos de perfil redondas */
+        .profile-pic {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--bg-rosa-suave);
+            margin-bottom: 10px;
+        }
+
+        .login-text { font-weight: 800; color: var(--color-acento); font-size: 1.1rem; }
 
         /* APP PRINCIPAL */
         .card { border-radius: 24px; border: none; box-shadow: 0 5px 20px rgba(0,0,0,0.03); background: white; }
@@ -72,6 +83,15 @@
             border: 2px solid var(--bg-rosa-suave); position: relative;
         }
         .shared-item.pagado { background-color: #effff2; border-color: #b9fbc0; opacity: 0.8; }
+        
+        /* Foto pequeña en el header */
+        .header-profile-pic {
+            width: 55px; height: 55px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
@@ -86,12 +106,12 @@
     
     <div class="d-flex gap-3">
         <div class="login-btn" onclick="iniciarSesion('Jose', 'Mi papi')">
-            <span class="login-emoji">👨🏻‍💻</span>
+            <img src="jose.jpg" class="profile-pic" onerror="this.src='https://cdn-icons-png.flaticon.com/512/236/236831.png'">
             <span class="login-text">Mi papi</span>
         </div>
         
         <div class="login-btn" onclick="iniciarSesion('Gabriela', 'Mi mami')">
-            <span class="login-emoji">👱🏻‍♀️</span>
+            <img src="gabriela.jpg" class="profile-pic" onerror="this.src='https://cdn-icons-png.flaticon.com/512/6997/6997662.png'">
             <span class="login-text">Mi mami</span>
         </div>
     </div>
@@ -101,7 +121,7 @@
     
     <div class="d-flex justify-content-between align-items-center mb-4 px-2">
         <div class="d-flex align-items-center gap-3">
-            <div style="font-size: 2.5rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));" id="icono-usuario">🐶</div>
+            <div id="icono-usuario-container"></div>
             <div>
                 <h3 class="fw-black m-0" style="color: var(--color-texto);" id="saludo-usuario">Hola!</h3>
                 <p class="mb-0 text-muted small fw-bold" id="subtitulo-usuario">Perfil cargando...</p>
@@ -232,8 +252,11 @@
 
         document.getElementById('saludo-usuario').innerText = "¡Hola, " + nombreCorto + "!";
         document.getElementById('subtitulo-usuario').innerText = "Perfil de " + real;
-        // EMOJI DEL PERFIL ACTUALIZADO A RUBIA
-        document.getElementById('icono-usuario').innerText = (real === 'Jose') ? '👨🏻‍💻' : '👱🏻‍♀️'; 
+        
+        // INYECTAR FOTO EN EL HEADER SEGÚN QUIÉN SEA
+        const imgFile = (real === 'Jose') ? 'jose.jpg' : 'gabriela.jpg';
+        document.getElementById('icono-usuario-container').innerHTML = `<img src="${imgFile}" class="header-profile-pic" onerror="this.src='https://cdn-icons-png.flaticon.com/512/847/847969.png'">`;
+        
         document.getElementById('usuario-input').value = carino;
     }
 
