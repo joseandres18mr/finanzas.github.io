@@ -4,65 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Soy la Mokkita Ahorradora</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* --- PALETA DE COLORES MOKKA --- */
+        :root {
+            --bg-crema: #fff9f0;      /* Fondo principal crema suave */
+            --bg-rosa-suave: #ffe3e8; /* Bordes y fondos claros */
+            --color-acento: #ff8fa3;  /* Rosado Mokka para botones */
+            --color-texto: #5a5a5a;   /* Texto gris cálido */
+        }
+
         body { 
-            background-color: #fff0f3; /* Rosa muy suave */
+            background-color: var(--bg-crema);
             font-family: 'Nunito', sans-serif; 
+            color: var(--color-texto);
         }
         
         /* PANTALLA LOGIN */
         #login-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(180deg, #ffccd5 0%, #fff0f3 100%);
+            background: linear-gradient(180deg, #ffe4d1 0%, #fff9f0 100%);
             z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         
         .mokka-img {
-            width: 180px; height: 180px; 
+            width: 260px; height: 260px; 
             border-radius: 50%; 
             object-fit: cover;
-            border: 5px solid white;
-            box-shadow: 0 8px 20px rgba(255, 100, 100, 0.2);
-            margin-bottom: 20px;
+            border: 6px solid white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
         }
 
         .login-btn {
-            background: white; border: none; border-radius: 20px;
-            padding: 20px; width: 140px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            background: white; border: none; border-radius: 24px;
+            padding: 20px; width: 150px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.05);
             transition: transform 0.2s; cursor: pointer;
         }
         .login-btn:active { transform: scale(0.95); }
-        .login-emoji { font-size: 3.5rem; display: block; margin-bottom: 10px; }
-        .login-text { font-weight: 900; color: #ff5c8d; font-size: 1.1rem; }
+        .login-emoji { font-size: 3.8rem; display: block; margin-bottom: 5px; }
+        .login-text { font-weight: 800; color: var(--color-acento); font-size: 1.2rem; }
 
         /* APP PRINCIPAL */
-        .card { border-radius: 20px; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .card { border-radius: 24px; border: none; box-shadow: 0 5px 20px rgba(0,0,0,0.03); background: white; }
         .form-control, .form-select { 
-            border-radius: 15px; padding: 12px; border: 2px solid #ffe3e8; 
-            background-color: #fffbfb;
+            border-radius: 16px; padding: 14px; border: 2px solid var(--bg-rosa-suave); 
+            background-color: #fffbfb; font-size: 1rem;
         }
-        .form-control:focus { border-color: #ff8fa3; box-shadow: none; }
+        .form-control:focus { border-color: var(--color-acento); box-shadow: none; }
         
         .btn-mokka { 
-            background-color: #ff8fa3; color: white; border-radius: 15px; 
-            font-weight: 800; padding: 12px; border: none; 
+            background-color: var(--color-acento); color: white; border-radius: 16px; 
+            font-weight: 800; padding: 14px; border: none; font-size: 1.1rem;
         }
         .btn-mokka:hover { background-color: #ff758f; color: white; }
 
-        .nav-pills .nav-link.active { background-color: #ff8fa3; border-radius: 15px; }
-        .nav-pills .nav-link { color: #ff8fa3; }
+        .nav-pills .nav-link.active { background-color: var(--color-acento); border-radius: 16px; }
+        .nav-pills .nav-link { color: var(--color-acento); font-weight: 800; padding: 12px; }
+        .nav-pills { background: white; padding: 6px; border-radius: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
 
         /* ESTADOS DEUDA */
         .shared-item { 
-            background: white; border-radius: 15px; padding: 15px; margin-bottom: 12px; 
-            border: 2px solid #ffe3e8; position: relative;
+            background: white; border-radius: 18px; padding: 16px; margin-bottom: 14px; 
+            border: 2px solid var(--bg-rosa-suave); position: relative;
         }
-        .shared-item.pagado { background-color: #e3ffe8; border-color: #b9fbc0; opacity: 0.7; }
-        .badge-status { border-radius: 10px; padding: 5px 10px; }
+        .shared-item.pagado { background-color: #effff2; border-color: #b9fbc0; opacity: 0.8; }
     </style>
 </head>
 <body>
@@ -70,10 +79,10 @@
 <div id="login-screen">
     <img src="mokka.jpg" alt="Mokkita" class="mokka-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/616/616408.png'">
     
-    <h1 class="fw-bold mb-1" style="color: #ff5c8d;">¡Hola!</h1>
-    <p class="mb-5 text-muted fw-bold">Soy la Mokkita ahorradora 🐾</p>
+    <h1 class="fw-black mb-1" style="color: var(--color-acento);">¡Hola!</h1>
+    <p class="mb-5 text-muted fw-bold" style="font-size: 1.1rem;">Soy la Mokkita ahorradora 🐾</p>
     
-    <p class="mb-3 fw-bold" style="color: #888;">¿Quién eres?</p>
+    <p class="mb-3 fw-bold text-muted">¿Quién eres?</p>
     
     <div class="d-flex gap-3">
         <div class="login-btn" onclick="iniciarSesion('Jose', 'Mi papi')">
@@ -82,27 +91,28 @@
         </div>
         
         <div class="login-btn" onclick="iniciarSesion('Gabriela', 'Mi mami')">
-            <span class="login-emoji">👩🏼‍🎨</span> <span class="login-text">Mi mami</span>
+            <span class="login-emoji">👩🏼</span>
+            <span class="login-text">Mi mami</span>
         </div>
     </div>
 </div>
 
-<div id="app-screen" class="container py-3" style="max-width: 600px; display:none;">
+<div id="app-screen" class="container py-4" style="max-width: 500px; display:none;">
     
     <div class="d-flex justify-content-between align-items-center mb-4 px-2">
-        <div class="d-flex align-items-center gap-2">
-            <div style="font-size: 2rem;" id="icono-usuario">🐶</div>
+        <div class="d-flex align-items-center gap-3">
+            <div style="font-size: 2.5rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));" id="icono-usuario">🐶</div>
             <div>
-                <h4 class="fw-bold m-0" style="color:#555;" id="saludo-usuario">Hola!</h4>
-                <small class="text-muted fw-bold">Vamos a ahorrar</small>
+                <h3 class="fw-black m-0" style="color: var(--color-texto);" id="saludo-usuario">Hola!</h3>
+                <p class="mb-0 text-muted small fw-bold" id="subtitulo-usuario">Perfil cargando...</p>
             </div>
         </div>
-        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="location.reload()">Salir</button>
+        <button class="btn btn-sm btn-light border rounded-pill px-3 fw-bold text-muted" onclick="location.reload()">Salir</button>
     </div>
 
-    <ul class="nav nav-pills nav-fill mb-4 bg-white p-1 rounded-4 shadow-sm">
-        <li class="nav-item"><button class="nav-link active fw-bold" data-bs-toggle="tab" data-bs-target="#registro-pane">📝 Anotar</button></li>
-        <li class="nav-item"><button class="nav-link fw-bold" data-bs-toggle="tab" data-bs-target="#graficos-pane" onclick="cargarDatos()">📊 Mi Bolsillo</button></li>
+    <ul class="nav nav-pills nav-fill mb-4">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#registro-pane">📝 Anotar</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#graficos-pane" onclick="cargarDatos()">📊 Mi Bolsillo</button></li>
     </ul>
 
     <div class="tab-content">
@@ -114,8 +124,10 @@
                       action="https://script.google.com/macros/s/AKfycbz2hTiT_DCceJkzh0_rMjy0EJkbDAgXEyztYAVNNMIAkb4CwQC1ySajrmmB8U7KO8ubuQ/exec" 
                       method="POST" target="hidden_iframe">
                     
-                    <input type="hidden" name="usuario" id="usuario-input"> <div class="mb-3">
-                        <label class="fw-bold text-muted small ms-1">¿QUÉ ES?</label>
+                    <input type="hidden" name="usuario" id="usuario-input">
+
+                    <div class="mb-3">
+                        <label class="fw-bold text-muted small ms-2 mb-1">¿QUÉ ES?</label>
                         <select class="form-select" name="tipo" id="tipoSelector" onchange="cambiarColor()">
                             <option value="Gasto">Un Gasto 💸</option>
                             <option value="Ingreso">Un Ingreso 💰</option>
@@ -123,15 +135,15 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="fw-bold text-muted small ms-1">¿CUÁNTO?</label>
+                        <label class="fw-bold text-muted small ms-2 mb-1">¿CUÁNTO?</label>
                         <div class="input-group">
-                            <span class="input-group-text border-0 bg-transparent fw-bold text-muted">$</span>
-                            <input type="text" class="form-control" name="monto" id="monto" placeholder="0" required inputmode="numeric">
+                            <span class="input-group-text border-0 bg-transparent fw-bold text-muted fs-5">$</span>
+                            <input type="text" class="form-control fw-bold fs-5" name="monto" id="monto" placeholder="0" required inputmode="numeric text-end">
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="fw-bold text-muted small ms-1">CATEGORÍA</label>
+                        <label class="fw-bold text-muted small ms-2 mb-1">CATEGORÍA</label>
                         <select class="form-select" name="categoria">
                             <option value="Supermercado">🛒 Supermercado</option>
                             <option value="Comida Fuera">🍔 Comida / Delivery</option>
@@ -146,58 +158,62 @@
                         </select>
                     </div>
 
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <input type="text" class="form-control" name="descripcion" placeholder="¿Qué compraste? (Opcional)">
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-4 mb-3" id="div-compartido">
-                        <div><strong class="d-block text-muted" style="font-size:0.9rem;">¿Es para los dos?</strong><span class="small text-muted">Mitad y mitad</span></div>
-                        <div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="es_compartido" style="width: 3em; height: 1.5em;"></div>
+                    <div class="d-flex justify-content-between align-items-center bg-white border-2 border p-3 rounded-4 mb-4" id="div-compartido" style="border-color: var(--bg-rosa-suave)!important;">
+                        <div><strong class="d-block" style="color: var(--color-texto);">¿Es para los dos?</strong><span class="small text-muted">Se divide entre papi y mami</span></div>
+                        <div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="es_compartido" style="width: 3.5em; height: 1.8em; cursor: pointer;"></div>
                     </div>
 
-                    <button type="submit" class="btn btn-mokka w-100 shadow-sm" id="btnSubmit">Guardar</button>
+                    <button type="submit" class="btn btn-mokka w-100 shadow-sm py-3" id="btnSubmit">Guardar</button>
                 </form>
             </div>
         </div>
 
         <div class="tab-pane fade" id="graficos-pane">
-            <div id="loading" class="text-center py-5">
-                <div class="spinner-border text-danger" role="status"></div>
-                <p class="mt-2 text-muted small fw-bold">Oliendo las cuentas... 🐶</p>
+            <div id="loading" class="text-center py-5 my-5">
+                <div class="spinner-border text-danger opacity-50" role="status" style="width: 3rem; height: 3rem;"></div>
+                <p class="mt-3 text-muted fw-bold">Oliendo las cuentas... 🐶</p>
             </div>
 
             <div id="stats-content" style="display:none;">
-                <div class="card p-3 mb-3 bg-white border-0 shadow-sm text-center">
-                    <small class="text-uppercase text-muted fw-bold" style="font-size:0.7rem;">Me queda en el bolsillo</small>
-                    <h1 class="fw-black my-1" style="color: #4cc9f0;" id="mi-saldo">$0</h1>
-                    <div class="d-flex justify-content-center gap-3 mt-2">
-                        <span class="badge bg-light text-success border border-success">Ingresos: <span id="mi-ingreso">$0</span></span>
-                        <span class="badge bg-light text-danger border border-danger">Gastos: <span id="mi-gasto">$0</span></span>
+                <div class="card p-4 mb-4 text-center bg-white">
+                    <small class="text-uppercase text-muted fw-bold ls-1">Me queda en el bolsillo</small>
+                    <h1 class="fw-black my-2 display-4" style="color: #4cc9f0;" id="mi-saldo">$0</h1>
+                    <div class="d-flex justify-content-center gap-3 mt-3">
+                        <span class="px-3 py-2 rounded-pill bg-success bg-opacity-10 text-success fw-bold small">Ingresos: <span id="mi-ingreso">$0</span></span>
+                        <span class="px-3 py-2 rounded-pill bg-danger bg-opacity-10 text-danger fw-bold small">Gastos: <span id="mi-gasto">$0</span></span>
                     </div>
                 </div>
 
-                <button class="btn btn-warning w-100 mb-4 py-3 rounded-4 fw-bold shadow-sm text-white" onclick="verCompartidos()" style="background: #ffbe0b; border:none;">
-                    💸 Ver Deudas Pendientes
-                    <span class="badge bg-danger rounded-pill ms-2" id="badge-deudas" style="display:none">0</span>
+                <button class="btn w-100 mb-4 py-3 rounded-4 fw-black shadow-sm text-white position-relative overflow-hidden" onclick="verCompartidos()" style="background: #ffbe0b; border:none; font-size: 1.1rem;">
+                    <span style="position: relative; z-index: 1;">💸 Ver Deudas Pendientes</span>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-2 border-white" id="badge-deudas" style="display:none; font-size: 0.8rem;">0</span>
                 </button>
 
-                <div class="card p-3">
-                    <h6 class="fw-bold text-muted mb-3 text-center">En qué se fue la plata</h6>
-                    <div style="height:250px;"><canvas id="miChart"></canvas></div>
+                <div class="card p-4">
+                    <h6 class="fw-bold text-muted mb-4 text-center">En qué se fue la plata</h6>
+                    <div class="d-flex justify-content-center align-items-center" style="height:300px; width: 100%;">
+                         <div style="height:100%; width:100%; max-width: 400px; position: relative;">
+                              <canvas id="miChart"></canvas>
+                         </div>
+                    </div>
                 </div>
                 
-                <button class="btn btn-light text-muted w-100 mt-3 rounded-pill" onclick="cargarDatos()">🔄 Actualizar</button>
+                <button class="btn btn-link text-muted w-100 mt-3 text-decoration-none fw-bold" onclick="cargarDatos()">🔄 Actualizar datos</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="compartidosModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header border-0"><h5 class="modal-title fw-bold">🤝 Cuentas con tu pareja</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body bg-light rounded-bottom"><div id="lista-compartidos"></div></div></div></div></div>
-<div class="modal fade" id="detalleModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header border-0"><h5 class="modal-title fw-bold" id="modalTitulo">Detalle</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div id="lista-detalle"></div></div></div></div></div>
+<div class="modal fade" id="compartidosModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content border-0 rounded-4"><div class="modal-header border-0 pb-0"><h5 class="modal-title fw-black text-muted">🤝 Cuentas con tu pareja</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body bg-light rounded-bottom m-3 p-3 rounded-4"><div id="lista-compartidos"></div></div></div></div></div>
+<div class="modal fade" id="detalleModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content border-0 rounded-4"><div class="modal-header border-0 pb-0"><h5 class="modal-title fw-black text-muted" id="modalTitulo">Detalle</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body m-3"><div id="lista-detalle"></div></div></div></div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // !!! PEGA AQUÍ LA URL DE TU SCRIPT NUEVO !!!
+    // !!! PEGA LA URL DE TU SCRIPT AQUÍ !!!
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz2hTiT_DCceJkzh0_rMjy0EJkbDAgXEyztYAVNNMIAkb4CwQC1ySajrmmB8U7KO8ubuQ/exec";
     
     let usuarioApp = ""; // Jose o Gabriela
@@ -211,12 +227,16 @@
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('app-screen').style.display = 'block';
         
-        document.getElementById('saludo-usuario').innerText = "Hola, " + carino + "!";
-        document.getElementById('icono-usuario').innerText = (real === 'Jose') ? '👨🏻‍💻' : '👩🏼‍🎨';
-        document.getElementById('usuario-input').value = carino; // Enviamos "Mi papi" al form
+        let nombreCorto = carino.split(" ")[1];
+        nombreCorto = nombreCorto.charAt(0).toUpperCase() + nombreCorto.slice(1);
+
+        document.getElementById('saludo-usuario').innerText = "¡Hola, " + nombreCorto + "!";
+        document.getElementById('subtitulo-usuario').innerText = "Perfil de " + real;
+        // EMOJI DEL PERFIL ACTUALIZADO
+        document.getElementById('icono-usuario').innerText = (real === 'Jose') ? '👨🏻‍💻' : '👩🏼'; 
+        document.getElementById('usuario-input').value = carino;
     }
 
-    // --- FORMATEO Y ENVIO ---
     const montoInput = document.getElementById('monto');
     const form = document.getElementById('financeForm');
     const btnSubmit = document.getElementById('btnSubmit');
@@ -231,12 +251,12 @@
         const tipo = document.getElementById('tipoSelector').value;
         const divComp = document.getElementById('div-compartido');
         if(tipo === 'Gasto') {
-            btnSubmit.style.backgroundColor = "#ff8fa3";
-            btnSubmit.innerText = "Registrar Gasto";
+            btnSubmit.style.backgroundColor = "var(--color-acento)";
+            btnSubmit.innerText = "Guardar Gasto";
             divComp.style.display = "flex";
         } else {
             btnSubmit.style.backgroundColor = "#4cc9f0";
-            btnSubmit.innerText = "Registrar Ingreso";
+            btnSubmit.innerText = "Guardar Ingreso";
             divComp.style.display = "none";
             form.es_compartido.checked = false;
         }
@@ -250,16 +270,16 @@
 
     document.getElementById('hidden_iframe').onload = function() {
         if (submitted) {
-            alert("✅ ¡Anotado!");
+            alert("✅ ¡Anotado con éxito!");
             form.reset();
-            document.getElementById('usuario-input').value = usuarioCari; // Restaurar nombre cariño
+            document.getElementById('usuario-input').value = usuarioCari;
             cambiarColor();
+            btnSubmit.innerText = "Guardar";
             btnSubmit.disabled = false;
             submitted = false;
         }
     };
 
-    // --- CARGAR DATOS ---
     function cargarDatos() {
         document.getElementById('loading').style.display = 'block';
         document.getElementById('stats-content').style.display = 'none';
@@ -268,14 +288,13 @@
             .then(r => r.json())
             .then(data => {
                 datosCompletos = data;
-                const misDatos = data[usuarioApp]; // Accedemos con "Jose" o "Gabriela"
+                const misDatos = data[usuarioApp];
                 const fmt = (n) => "$ " + new Intl.NumberFormat('es-CL').format(n);
                 
                 document.getElementById('mi-ingreso').innerText = fmt(misDatos.ingresos);
                 document.getElementById('mi-gasto').innerText = fmt(misDatos.gastos);
                 document.getElementById('mi-saldo').innerText = fmt(misDatos.saldo);
 
-                // Badge rojo
                 const pendientes = misDatos.compartidos.filter(i => i.estado === "IMPAGO").length;
                 const badge = document.getElementById('badge-deudas');
                 if(pendientes > 0) { badge.innerText = pendientes; badge.style.display = 'inline-block'; }
@@ -297,10 +316,14 @@
             type: 'doughnut',
             data: {
                 labels: labels,
-                datasets: [{ data: vals, backgroundColor: ['#ffadad', '#ffd6a5', '#fdffb6', '#caffbf', '#9bf6ff', '#a0c4ff', '#bdb2ff', '#ffc6ff'], borderWidth:0 }]
+                datasets: [{ data: vals, backgroundColor: ['#ffadad', '#ffd6a5', '#fdffb6', '#caffbf', '#9bf6ff', '#a0c4ff', '#bdb2ff', '#ffc6ff'], borderWidth: 2, borderColor: 'white' }]
             },
             options: { 
-                plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: { family: 'Nunito' } } } },
+                responsive: true, maintainAspectRatio: false,
+                layout: { padding: 20 },
+                plugins: { 
+                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { family: 'Nunito', weight: 'bold' } } }
+                },
                 onClick: (e, el) => { if(el.length > 0) abrirDetalle(labels[el[0].index]); }
             }
         });
@@ -313,37 +336,36 @@
         lista.innerHTML = "";
         items.forEach(i => {
              lista.insertAdjacentHTML('beforeend', `
-                <div class="d-flex justify-content-between border-bottom py-2">
-                    <div><div class="fw-bold text-dark">${i.desc}</div><div class="text-muted small">${i.fecha}</div></div>
-                    <div class="fw-bold" style="color:#ff5c8d">$ ${new Intl.NumberFormat('es-CL').format(i.monto)}</div>
+                <div class="d-flex justify-content-between border-bottom py-3 align-items-center">
+                    <div><div class="fw-bold text-dark mb-1" style="font-size:1.1rem;">${i.desc}</div><div class="badge bg-light text-muted border">📅 ${i.fecha}</div></div>
+                    <div class="fw-black fs-5" style="color: var(--color-acento)">$ ${new Intl.NumberFormat('es-CL').format(i.monto)}</div>
                 </div>`);
         });
         new bootstrap.Modal(document.getElementById('detalleModal')).show();
     }
 
-    // --- LOGICA DEUDAS (EL FIX) ---
     function verCompartidos() {
         const items = datosCompletos[usuarioApp].compartidos;
         const lista = document.getElementById('lista-compartidos');
         lista.innerHTML = "";
         
         if(items.length === 0) {
-            lista.innerHTML = "<div class='text-center py-4 text-muted'>✨ ¡Todo pagado! Eres libre. ✨</div>";
+            lista.innerHTML = "<div class='text-center py-5'><div style='font-size: 3rem;'>🎉</div><h5 class='fw-bold text-muted mt-3'>¡Todo pagado!</h5><p class='text-muted small'>No tienes deudas pendientes.</p></div>";
         } else {
             items.forEach(i => {
                 const pagado = i.estado === "PAGADO";
                 const html = `
                 <div class="shared-item ${pagado ? 'pagado' : ''}" id="card-${i.id}">
                     <div class="d-flex justify-content-between mb-2">
-                        <span class="badge bg-white text-muted border">📅 ${i.fecha}</span>
-                        <span class="badge ${pagado?'bg-success':'bg-danger'}">${pagado?'PAGADO ✅':'POR PAGAR ❌'}</span>
+                        <span class="badge bg-white text-muted border fw-bold">📅 ${i.fecha}</span>
+                        <span class="badge ${pagado?'bg-success':'bg-danger'} fw-bold px-3">${pagado?'PAGADO ✅':'POR PAGAR ❌'}</span>
                     </div>
-                    <h6 class="fw-bold text-dark mb-1">${i.desc}</h6>
-                    <small class="text-muted">Pagó: <strong>${i.acreedor}</strong></small>
-                    <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
-                        <div class="fw-bold" style="color:#555">Tu parte: $${new Intl.NumberFormat('es-CL').format(i.miParte)}</div>
+                    <h6 class="fw-black mb-1" style="font-size: 1.1rem; color: var(--color-texto);">${i.desc}</h6>
+                    <small class="text-muted fw-bold">Pagó: <span style="color: var(--color-acento);">${i.acreedor}</span></small>
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                        <div><small class="text-muted fw-bold d-block">Tu parte:</small><div class="fw-black fs-5" style="color: #555">$${new Intl.NumberFormat('es-CL').format(i.miParte)}</div></div>
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" style="width:3em; height:1.5em; cursor:pointer;" 
+                            <input class="form-check-input" type="checkbox" style="width:3.5em; height:2em; cursor:pointer;" 
                                    onchange="pagar('${i.id}', this)" ${pagado ? 'checked disabled' : ''}>
                         </div>
                     </div>
@@ -355,27 +377,26 @@
     }
 
     function pagar(id, check) {
-        if(!confirm("¿Ya le pagaste a tu pareja? 💸")) { check.checked = false; return; }
-        
+        if(!confirm("¿Confirmar que ya pagaste esto? 💸")) { check.checked = false; return; }
         check.disabled = true;
         document.getElementById('card-'+id).style.opacity = '0.5';
-        
-        // ENVÍO ROBUSTO (STRINGIFY JSON)
         const payload = JSON.stringify({ accion: "actualizar_estado", id: String(id) });
-        
         fetch(APPS_SCRIPT_URL, {
             method: 'POST', mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain' }, // Hack para que Apps Script lo lea
+            headers: { 'Content-Type': 'text/plain' },
             body: payload
         }).then(() => {
-            // UI Update Optimista
             const c = document.getElementById('card-'+id);
             c.classList.add('pagado');
-            c.querySelector('.badge').className = "badge bg-success";
-            c.querySelector('.badge').innerText = "PAGADO ✅";
-            c.style.opacity = '0.8';
+            c.querySelector('.badge.bg-danger').className = "badge bg-success fw-bold px-3";
+            c.querySelector('.badge.bg-success').innerText = "PAGADO ✅";
+            c.style.opacity = '1';
+            const badge = document.getElementById('badge-deudas');
+            let count = parseInt(badge.innerText) || 0;
+            if(count > 0) badge.innerText = count - 1;
+            if(count - 1 <= 0) badge.style.display = 'none';
             alert("¡Listo! Deuda saldada 🐶");
-        }).catch(e => { alert("Error de conexión"); check.disabled = false; });
+        }).catch(e => { alert("Error de conexión"); check.disabled = false; c.style.opacity = '1'; });
     }
 </script>
 
