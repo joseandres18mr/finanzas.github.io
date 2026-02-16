@@ -91,7 +91,7 @@
         </div>
         
         <div class="login-btn" onclick="iniciarSesion('Gabriela', 'Mi mami')">
-            <span class="login-emoji">👩🏼</span>
+            <span class="login-emoji">👩🏽‍💼</span>
             <span class="login-text">Mi mami</span>
         </div>
     </div>
@@ -232,8 +232,8 @@
 
         document.getElementById('saludo-usuario').innerText = "¡Hola, " + nombreCorto + "!";
         document.getElementById('subtitulo-usuario').innerText = "Perfil de " + real;
-        // EMOJI DEL PERFIL ACTUALIZADO
-        document.getElementById('icono-usuario').innerText = (real === 'Jose') ? '👨🏻‍💻' : '👩🏼'; 
+        // EMOJI DEL PERFIL ACTUALIZADO EN EL HEADER TAMBIÉN
+        document.getElementById('icono-usuario').innerText = (real === 'Jose') ? '👨🏻‍💻' : '👩🏽‍💼'; 
         document.getElementById('usuario-input').value = carino;
     }
 
