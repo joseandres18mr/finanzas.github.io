@@ -18,8 +18,6 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             z-index: 9999; display: flex; align-items: center; justify-content: center;
         }
-        
-        /* Avatares de Login */
         .avatar-btn {
             width: 120px; height: 120px; border-radius: 50%; border: 4px solid white;
             background-color: white; font-size: 3rem; display: flex; align-items: center; justify-content: center;
@@ -27,7 +25,10 @@
         }
         .avatar-btn:active { transform: scale(0.95); }
         
-        .stat-card { transition: transform 0.2s; }
+        /* Modal Detalle */
+        .modal-content { border-radius: 20px; border: none; }
+        .item-detalle { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
+        .item-detalle:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
@@ -36,13 +37,11 @@
     <div class="text-center text-white">
         <h1 class="fw-bold mb-4">💰 Finanzas J&G</h1>
         <p class="mb-5 opacity-75">¿Quién está registrando?</p>
-        
         <div class="d-flex gap-4 justify-content-center">
             <div class="text-center">
                 <div class="avatar-btn text-primary mb-2" onclick="iniciarSesion('Jose')">👨🏻‍💻</div>
                 <div class="fw-bold">Jose</div>
             </div>
-            
             <div class="text-center">
                 <div class="avatar-btn text-danger mb-2" onclick="iniciarSesion('Gabriela')">👩🏻‍🎨</div>
                 <div class="fw-bold">Gabriela</div>
@@ -61,17 +60,16 @@
         <button class="btn btn-outline-secondary btn-sm rounded-pill" onclick="cerrarSesion()">Salir</button>
     </div>
 
-    <ul class="nav nav-pills nav-fill mb-3 bg-white p-1 rounded-3 shadow-sm" id="myTab" role="tablist">
+    <ul class="nav nav-pills nav-fill mb-3 bg-white p-1 rounded-3 shadow-sm">
         <li class="nav-item">
-            <button class="nav-link active fw-bold" id="registro-tab" data-bs-toggle="tab" data-bs-target="#registro-pane" type="button">📝 Registrar</button>
+            <button class="nav-link active fw-bold" id="registro-tab" data-bs-toggle="tab" data-bs-target="#registro-pane">📝 Registrar</button>
         </li>
         <li class="nav-item">
-            <button class="nav-link fw-bold" id="graficos-tab" data-bs-toggle="tab" data-bs-target="#graficos-pane" type="button" onclick="cargarDatos()">📊 Mis Gastos</button>
+            <button class="nav-link fw-bold" id="graficos-tab" data-bs-toggle="tab" data-bs-target="#graficos-pane" onclick="cargarDatos()">📊 Mis Gastos</button>
         </li>
     </ul>
 
     <div class="tab-content">
-        
         <div class="tab-pane fade show active" id="registro-pane">
             <div class="card">
                 <div class="card-body p-4">
@@ -120,12 +118,8 @@
                         </div>
 
                         <div class="alert alert-light border d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong class="d-block small">¿Compartido? (50/50)</strong>
-                            </div>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" name="es_compartido">
-                            </div>
+                            <div><strong class="d-block small">¿Compartido? (50/50)</strong></div>
+                            <div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="es_compartido"></div>
                         </div>
 
                         <button type="submit" class="btn btn-danger w-100 btn-lg shadow-sm" id="btnSubmit">Registrar</button>
@@ -140,34 +134,50 @@
         </div>
 
         <div class="tab-pane fade" id="graficos-pane">
-            
             <div id="loading" class="text-center py-5">
                 <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Consultando tu deuda...</p>
+                <p class="mt-2 text-muted">Consultando detalle...</p>
             </div>
 
             <div id="stats-content" style="display:none;">
-                
                 <div class="card mb-3 stat-card bg-white border border-primary border-opacity-25">
                     <div class="card-body text-center pt-4">
                         <small class="text-uppercase text-muted fw-bold">Total Gastado este Mes</small>
                         <h1 class="display-4 fw-bold text-primary my-2" id="mi-total">$0</h1>
-                        <p class="small text-muted mb-0">(Incluye tus gastos + la mitad de lo compartido)</p>
+                        <p class="small text-muted mb-0">(Toca el gráfico para ver detalle)</p>
                     </div>
                 </div>
 
                 <div class="card mb-3">
                     <div class="card-body">
-                        <h6 class="fw-bold mb-3">Distribución de Gastos</h6>
-                        <div style="height:250px; position:relative;">
+                        <h6 class="fw-bold mb-3">Distribución (Click para detalle)</h6>
+                        <div style="height:300px; position:relative;">
                             <canvas id="miChart"></canvas>
                         </div>
                     </div>
                 </div>
-
+                
                 <div class="d-grid gap-2">
-                    <button class="btn btn-light border" onclick="cargarDatos()">🔄 Actualizar mis datos</button>
+                    <button class="btn btn-light border" onclick="cargarDatos()">🔄 Actualizar datos</button>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="detalleModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="modalTitulo">Detalle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <div id="lista-detalle">
+                    </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary w-100 rounded-pill" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
     </div>
@@ -176,36 +186,30 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // --- 1. CONFIGURACIÓN ---
-    // !!! IMPORTANTE: PON TU URL DEL SCRIPT AQUÍ !!!
+    // !!! PEGA TU URL DE SCRIPT AQUI !!!
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz2hTiT_DCceJkzh0_rMjy0EJkbDAgXEyztYAVNNMIAkb4CwQC1ySajrmmB8U7KO8ubuQ/exec";
     
     let usuarioActual = "";
     let myChart = null;
+    let datosActuales = null; // Para guardar los datos descargados
 
-    // --- 2. SISTEMA DE LOGIN ---
+    // --- 2. LOGIN Y UI ---
     function iniciarSesion(nombre) {
         usuarioActual = nombre;
-        
-        // Ocultar login, mostrar app
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('app-screen').style.display = 'block';
-        
-        // Personalizar interfaz
         document.getElementById('saludo-usuario').innerText = "Hola, " + nombre + "!";
-        document.getElementById('usuario-input').value = nombre; // Llenar input oculto
+        document.getElementById('usuario-input').value = nombre;
     }
 
-    function cerrarSesion() {
-        location.reload(); // Recargar página para volver al login
-    }
+    function cerrarSesion() { location.reload(); }
 
-    // --- 3. LÓGICA DE REGISTRO ---
+    // --- 3. REGISTRO ---
     const montoInput = document.getElementById('monto');
     const form = document.getElementById('financeForm');
     const btnSubmit = document.getElementById('btnSubmit');
     var submitted = false;
 
-    // Formato CLP (Puntos de miles)
     montoInput.addEventListener('input', (e) => {
         let value = e.target.value.replace(/\D/g, "");
         e.target.value = value ? new Intl.NumberFormat('es-CL').format(value) : "";
@@ -230,13 +234,9 @@
 
     document.getElementById('hidden_iframe').onload = function() {
         if (submitted) {
-            // Historial visual rápido
             agregarHistorialVisual(form.categoria.value, form.monto.value, form.tipo.value);
-            
-            alert("✅ ¡Registrado correctamente!");
+            alert("✅ ¡Registrado!");
             form.reset();
-            
-            // Restaurar usuario y botón
             document.getElementById('usuario-input').value = usuarioActual;
             btnSubmit.innerText = "Registrar Gasto";
             btnSubmit.disabled = false;
@@ -251,8 +251,7 @@
         document.getElementById('historial').insertAdjacentHTML('afterbegin', html);
     }
 
-
-    // --- 4. LÓGICA DE GRÁFICOS (FILTRADO POR USUARIO) ---
+    // --- 4. GRÁFICOS INTERACTIVOS ---
     function cargarDatos() {
         document.getElementById('loading').style.display = 'block';
         document.getElementById('stats-content').style.display = 'none';
@@ -260,48 +259,82 @@
         fetch(APPS_SCRIPT_URL)
             .then(response => response.json())
             .then(data => {
-                // Filtramos SOLO los datos del usuario logueado
-                const datosUsuario = data[usuarioActual];
-                mostrarGraficoPersonal(datosUsuario);
+                datosActuales = data[usuarioActual].desglose; // Guardamos el detalle
+                const total = data[usuarioActual].total;
+                
+                document.getElementById('mi-total').innerText = "$ " + new Intl.NumberFormat('es-CL').format(total);
+                mostrarGrafico(datosActuales);
                 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('stats-content').style.display = 'block';
             })
-            .catch(error => {
-                console.error("Error:", error);
-                document.getElementById('loading').innerHTML = "<p class='text-danger'>Error de conexión</p>";
-            });
+            .catch(error => { console.error(error); document.getElementById('loading').innerHTML = "Error conexión"; });
     }
 
-    function mostrarGraficoPersonal(datos) {
-        // Actualizar Total Grande
-        document.getElementById('mi-total').innerText = "$ " + new Intl.NumberFormat('es-CL').format(datos.total);
-
-        // Preparar Gráfico
+    function mostrarGrafico(desglose) {
         const ctx = document.getElementById('miChart').getContext('2d');
         if (myChart) myChart.destroy();
 
-        // Colores
-        const colors = ['#ff7675', '#74b9ff', '#ffeaa7', '#55efc4', '#a29bfe', '#fab1a0', '#00b894', '#636e72'];
+        // Extraer etiquetas y valores TOTALES
+        const labels = Object.keys(desglose);
+        const dataValues = labels.map(key => desglose[key].valor);
 
         myChart = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: Object.keys(datos.desglose),
+                labels: labels,
                 datasets: [{
-                    data: Object.values(datos.desglose),
-                    backgroundColor: colors,
+                    data: dataValues,
+                    backgroundColor: ['#ff7675', '#74b9ff', '#ffeaa7', '#55efc4', '#a29bfe', '#fab1a0', '#00b894'],
                     borderWidth: 0
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom' }
-                }
+                onClick: (evt, elements) => {
+                    if(elements.length > 0) {
+                        const index = elements[0].index;
+                        const categoriaClick = labels[index];
+                        abrirModalDetalle(categoriaClick);
+                    }
+                },
+                plugins: { legend: { position: 'bottom' } }
             }
         });
+    }
+
+    // --- 5. MODAL DE DETALLE ---
+    function abrirModalDetalle(categoria) {
+        const items = datosActuales[categoria].items;
+        const modalTitle = document.getElementById('modalTitulo');
+        const lista = document.getElementById('lista-detalle');
+        
+        modalTitle.innerText = "Detalle: " + categoria;
+        lista.innerHTML = ""; // Limpiar anterior
+
+        if (items.length === 0) {
+            lista.innerHTML = "<p class='text-center text-muted'>Sin detalles disponibles</p>";
+        } else {
+            items.forEach(item => {
+                const montoFmt = new Intl.NumberFormat('es-CL').format(item.monto);
+                const desc = item.desc || "Sin descripción";
+                
+                const fila = `
+                    <div class="item-detalle">
+                        <div>
+                            <div class="fw-bold">${desc}</div>
+                        </div>
+                        <div class="text-danger fw-bold">$ ${montoFmt}</div>
+                    </div>
+                `;
+                lista.insertAdjacentHTML('beforeend', fila);
+            });
+        }
+
+        // Abrir Modal Bootstrap
+        var myModal = new bootstrap.Modal(document.getElementById('detalleModal'));
+        myModal.show();
     }
 </script>
 
