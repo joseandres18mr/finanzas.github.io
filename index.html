@@ -11,11 +11,8 @@
         .card { border-radius: 16px; border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .form-control, .form-select { border-radius: 12px; padding: 12px; }
         .btn-lg { border-radius: 12px; font-weight: 600; padding: 12px; }
-        
-        /* Colores dinámicos */
         .btn-gasto { background-color: #ff4757; color: white; border: none; }
         .btn-ingreso { background-color: #2ed573; color: white; border: none; }
-
         .form-check-input { width: 3.5em; height: 1.8em; cursor: pointer; }
     </style>
 </head>
@@ -33,13 +30,14 @@
             <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
 
             <form id="financeForm" 
-                  action="https://script.google.com/macros/s/AKfycbxikiPVqWI-gO4d6LCt-sSOFPQaPlS-3DMxnH_915JOGMNRU5kquIva_nPA7kVbdf3CJA/exec" 
+                  action="https://script.google.com/macros/s/AKfycbz2hTiT_DCceJkzh0_rMjy0EJkbDAgXEyztYAVNNMIAkb4CwQC1ySajrmmB8U7KO8ubuQ/exec" 
                   method="POST" 
                   target="hidden_iframe">
                 
                 <div class="mb-3">
                     <label class="form-label fw-bold">¿Quién registra?</label>
-                    <select class="form-select" name="usuario"> <option value="Jose">Jose</option>
+                    <select class="form-select" name="usuario">
+                        <option value="Jose">Jose</option>
                         <option value="Gabriela">Gabriela</option>
                     </select>
                 </div>
@@ -96,7 +94,9 @@
 </div>
 
 <script>
-    // Cambiar color del botón
+    var submitted = false;
+
+    // 1. Cambiar color del botón según Gasto/Ingreso
     function cambiarColor() {
         const tipo = document.getElementById('tipoSelector').value;
         const btn = document.getElementById('btnSubmit');
@@ -109,22 +109,27 @@
         }
     }
 
-    // Detectar cuando se envió el formulario para limpiar campos
-    var iframe = document.getElementById('hidden_iframe');
-    iframe.onload = function() {
-        // Esta función se ejecuta cuando Google responde (aunque sea invisible)
-        // Solo si ya hemos enviado algo (para evitar que salte al cargar la página)
-        if (submitted) {
-            alert("¡Gasto guardado correctamente!");
-            document.getElementById('financeForm').reset();
-            submitted = false;
-        }
-    };
-
-    var submitted = false;
+    // 2. Al hacer clic en enviar
     document.getElementById('financeForm').onsubmit = function() {
         submitted = true;
         document.getElementById('btnSubmit').innerText = "Guardando...";
+        document.getElementById('btnSubmit').disabled = true;
+    };
+
+    // 3. Detectar cuando Google responde (en el iframe oculto)
+    document.getElementById('hidden_iframe').onload = function() {
+        if (submitted) {
+            alert("¡Gasto guardado correctamente!");
+            
+            // Limpiar formulario y resetear botón
+            document.getElementById('financeForm').reset();
+            document.getElementById('btnSubmit').innerText = "Registrar Gasto";
+            document.getElementById('btnSubmit').disabled = false;
+            submitted = false;
+            
+            // Restaurar color original
+            cambiarColor(); 
+        }
     };
 </script>
 
